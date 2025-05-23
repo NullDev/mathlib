@@ -45,9 +45,12 @@ It's a collection of functions I re-use occasionally. And it's **BigInt only!**
 - modInv - Modular inverse of a number using the Extended Euclidean algorithm
 - modDiv - Modular division of two numbers
 - isPrime - Miller-Rabin primality test on 64-bit-size BigInts with deterministic base set
+- eulerCriterion - Euler's criterion for quadratic residues modulo a prime p
 - randomBigInt - Cryptographically-strong (hopefully) random bigint in given range
+- quadraticPoly - Quadratic polynomial f(x) = x² + c modulo n
 - pollardRho - Pollard's ρ algorithm for integer factorization using Brent's cycle detection
-- factor - prime factorization using Pollard's rho
+- factor - Prime factorization using Pollard's rho
+- highestSetBit - Position of the highest set bit in a BigInt
 - fibPair - Calculate the nth Fibonacci number modulo m using iterative fast-doubling
 - primePisano - Pisano period π(p) for a prime p
 - pisanoPeriod - Pisano period π(n) for any positive integer n ≥ 1

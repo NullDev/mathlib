@@ -1,5 +1,40 @@
 import { expect, test, describe } from "bun:test";
-import { randomBigInt } from "../lib/mathlib";
+import { bitLength, highestSetBit, randomBigInt } from "../lib/mathlib";
+
+// bitLength - number of bits in a BigInt
+describe("mathlib - bitLength", () => {
+    test("bitLength(0) = 0", () => {
+        expect(bitLength(0n)).toBe(0);
+    });
+
+    test("small numbers", () => {
+        expect(bitLength(1n)).toBe(1); // 1      → 1 bit
+        expect(bitLength(2n)).toBe(2); // 10     → 2 bits
+        expect(bitLength(3n)).toBe(2); // 11     → 2 bits
+        expect(bitLength(7n)).toBe(3); // 111    → 3 bits
+    });
+
+    test("large power-of-two boundary (2⁶³)", () => {
+        const n = 1n << 63n;           // 2^63
+        expect(bitLength(n)).toBe(64); // needs 64 bits (MSB position +1)
+        expect(bitLength(n - 1n)).toBe(63); // one less → 63 bits
+    });
+});
+
+// highestSetBit - position of MSB (1-based)
+describe("mathlib - highestSetBit", () => {
+    test("highest bit of 0 is 0", () => {
+        expect(highestSetBit(0n)).toBe(0n);
+    });
+
+    test("highest bit of 13 (1101₂) is 4", () => {
+        expect(highestSetBit(13n)).toBe(4n);
+    });
+
+    test("highest bit of 2⁶³ is 64", () => {
+        expect(highestSetBit(1n << 63n)).toBe(64n);
+    });
+});
 
 // randomBigInt - cryptographically‑strong random BigInt
 describe("mathlib - randomBigInt", () => {
