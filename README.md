@@ -2,6 +2,7 @@
 
 <p align="center" font-size="20px">🧮</p>
 <p align="center"><b>Zero-dependency collection of advanced mathematical functions using BigInts.</b></p>
+
 <hr>
 
 ## What this is
@@ -14,10 +15,14 @@ But I can give zero guarentees. If you're using this, you're on your own. <br>
 I do write tests for every single function implemented, but I cvan't guarentee that the tests are sane either... <br>
 All functions are documented - and I tried to comment the code as well as the tests as good as possible.
 
+<hr>
+
 ## What this isn't
 
 This is not a fully fledge mathematical library like [mathjs](https://mathjs.org/). <br>
 It's a collection of functions I re-use occasionally. And it's **BigInt only!**.
+
+<hr>
 
 ## What's implemented:
 
