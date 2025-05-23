@@ -340,7 +340,7 @@ export const pollardRho = (n: bigint): bigint => {
 };
 
 /**
- * Factor a number into its prime factors using Pollard's rho algorithm.
+ * Prime factorization using Pollard's rho algorithm.
  * Iterative: no recursion → safe for very composite inputs.
  *
  * @param {bigint} n - The number to factor.
