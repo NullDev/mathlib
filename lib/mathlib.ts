@@ -40,7 +40,7 @@ export const clamp = function(n: bigint, min: bigint, max: bigint): bigint {
  * @return {number} The bit length of the number.
  * @see {@link https://en.wikipedia.org/wiki/Bit_length}
  */
-const bitLength = function(v: bigint): number {
+export const bitLength = function(v: bigint): number {
     let bits = 0;
     for (let x = v; x > 0n; x >>= 1n) bits++;
     return bits;
@@ -337,6 +337,24 @@ export const isPrime = function(n: bigint): boolean {
 };
 
 /**
+ * Euler's criterion for quadratic residues modulo a prime p.
+ * Returns 1 if a is a quadratic residue modulo p, -1 if it is not, and 0 if a ≡ 0 (mod p).
+ *
+ * @param {bigint} a - The number to check.
+ * @param {bigint} p - The prime modulus.
+ * @returns {bigint} 1 if a is a quadratic residue, -1 if not, 0 if a ≡ 0 (mod p).
+ * @throws {Error} If p is not prime.
+ * @see {@link https://en.wikipedia.org/wiki/Euler%27s_criterion}
+ */
+export const eulerCriterion = function(a: bigint, p: bigint): bigint {
+    if (!isPrime(p)) throw new Error("eulerCriterion: p must be prime");
+    if (mod(a, p) === 0n) return 0n;
+    // (a|p) ≡ a^((p-1)/2) (mod p)
+    const result = modPow(a, (p - 1n) / 2n, p);
+    return result === 1n ? 1n : -1n;
+};
+
+/**
  * Return a cryptographically-strong random bigint in the
  * inclusive range [min, max]. Falls back to Math.random
  * when Web Crypto is missing (non-CSPRNG).
@@ -376,6 +394,18 @@ export const randomBigInt = function(min: bigint, max: bigint): bigint {
 };
 
 /**
+ * Evaluate a quadratic polynomial f(x) = x² + c modulo n.
+ *
+ * @param {bigint} x - The input value.
+ * @param {bigint} c - The constant term.
+ * @param {bigint} n - The modulus.
+ * @returns {bigint} The result of f(x) mod n.
+ */
+export const quadraticPoly = function(x: bigint, c: bigint, n: bigint): bigint {
+    return mod(x * x + c, n);
+};
+
+/**
  * Pollard's ρ algorithm for integer factorization using
  * Brent's cycle detection / batching variant for speed.
  *
@@ -387,9 +417,6 @@ export const pollardRho = (n: bigint): bigint => {
     // Quick outs for even or prime n
     if (mod(n, 2n) === 0n) return 2n;
     if (isPrime(n)) return n;
-
-    // Polynomial f(x) = x² + c (mod n)
-    const f = (x: bigint, c: bigint): bigint => mod(x * x + c, n);
 
     while (true) {
         // Fresh random parameters for each restart
@@ -406,8 +433,8 @@ export const pollardRho = (n: bigint): bigint => {
         // Main Brent loop
         while (g === 1n) {
             x = y;
-            /* Advance y by r steps (hare) */
-            for (let i = 0n; i < r; i++) y = f(y, c);
+            // Advance y by r steps (hare)
+            for (let i = 0n; i < r; i++) y = quadraticPoly(y, c, n); // Polynomial f(x) = x² + c (mod n)
 
             // Batch multiplications of |x − y| mod n
             let k = 0n;
@@ -415,9 +442,9 @@ export const pollardRho = (n: bigint): bigint => {
                 ys = y;
                 const lim = (m < r - k) ? m : r - k;
                 for (let i = 0n; i < lim; i++) {
-                    y = f(y, c);
+                    y = quadraticPoly(y, c, n);
                     const diff = x > y ? x - y : y - x;
-                    q = (q * diff) % n;
+                    q = mod(q * diff, n);
                 }
                 // gcd once per batch
                 g = gcd(q, n);
@@ -430,7 +457,7 @@ export const pollardRho = (n: bigint): bigint => {
         // If we only detected failure (g == n) walk back one-by-one
         if (g === n) {
             do {
-                ys = f(ys, c);
+                ys = quadraticPoly(ys, c, n);
                 const diff = x > ys ? x - ys : ys - x;
                 g = gcd(diff, n);
             } while (g === 1n);
@@ -472,6 +499,19 @@ export const factor = function(n: bigint): Map<bigint, bigint> {
 };
 
 /**
+ * Find the position of the highest set bit in a BigInt.
+ * Returns 0 for 0, and 1-based position for other numbers.
+ *
+ * @param {bigint} n - The number to find the highest set bit in.
+ * @returns {bigint} The 1-based position of the highest set bit, or 0 if n is 0.
+ */
+export const highestSetBit = function(n: bigint): bigint {
+    let bit = 0n;
+    for (let tmp = n; tmp > 0n; tmp >>= 1n) bit++;
+    return bit;
+};
+
+/**
  * Calculate the nth Fibonacci number modulo m using
  * iterative fast-doubling over the bits of n.
  * Works for n ≥ 0, m ≥ 1, all bigint.
@@ -490,8 +530,7 @@ export const fibPair = function(n: bigint, m: bigint): [bigint, bigint] {
     let b = 1n; // F₁
 
     // find highest set bit without String()
-    let bit = 0n;
-    for (let tmp = n; tmp > 0n; tmp >>= 1n) bit++;
+    let bit = highestSetBit(n);
 
     // scan bits from MSB → LSB
     for (bit -= 1n; bit >= 0n; bit--) {
@@ -533,9 +572,8 @@ export const primePisano = (p: bigint): bigint => {
 
     // 1. Choose the bound that π(p) must divide
     // Legendre symbol (5 | p) via Euler's criterion
-    // https://en.wikipedia.org/wiki/Euler%27s_criterion
     // https://en.wikipedia.org/wiki/Legendre_symbol
-    const legendre5 = modPow(5n, (p - 1n) / 2n, p); // 1n or p-1n
+    const legendre5 = eulerCriterion(5n, p);
     const bound = (legendre5 === 1n)
         ? (p - 1n)       // 5 is a square → p-1
         : 2n * (p + 1n); // otherwise     → 2(p+1)
