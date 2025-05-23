@@ -56,5 +56,6 @@ It's a collection of functions I re-use occasionally. And it's **BigInt only!**.
 - [ ] Build step & minification for browser
 - [ ] Better test setup (still figuring out bun:test)
 - [ ] Add more functions (only with tests)
+- [ ] NPM package maybe
 
 <hr>
