@@ -29,6 +29,12 @@ It's a collection of functions I re-use occasionally. And it's **BigInt only!**
 
 - abs - Absolute value of a BigInt
 - clamp - Clamp a BigInt to a given range
+- bitLength - Bit length of a BigInt
+- pow - Power of a BigInt (x^y)
+- nthRoot - nth root of a BigInt (x^(1/n))
+- sqrt - Square root of a BigInt
+- manhattanDist - Manhattan distance between two BigInts
+- euclideanDist - Euclidean distance between two BigInts
 - gcd - Greatest common divisor (2 inputs)
 - gcdMulti - Greatest common divisor of multiple numbers (variadic)
 - gcdExt - Extended Euclidean gcd algorithm for Bézout coefficients

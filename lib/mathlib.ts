@@ -33,14 +33,118 @@ export const clamp = function(n: bigint, min: bigint, max: bigint): bigint {
 };
 
 /**
+ * Calculate the bitlength of a BigInt - the number of bits required
+ * to represent the number in binary.
+ *
+ * @param {bigint} v
+ * @return {number} The bit length of the number.
+ * @see {@link https://en.wikipedia.org/wiki/Bit_length}
+ */
+const bitLength = function(v: bigint): number {
+    let bits = 0;
+    for (let x = v; x > 0n; x >>= 1n) bits++;
+    return bits;
+};
+
+/**
+ * Calculate the power of a base raised to an exponent.
+ *
+ * @param {bigint} base
+ * @param {number} exponent
+ * @return {bigint} The result of base raised to the power of exp.
+ */
+export const pow = (base: bigint, exp: number): bigint => {
+    let result = 1n;
+    let b = base;
+    let e = exp;
+    while (e > 0) {
+        if (e & 1) result *= b;
+        // eslint-disable-next-line no-cond-assign
+        if (e >>= 1) b *= b;
+    }
+    return result;
+};
+
+/**
+ * Floor of the n-th root of a ≥ 0 using Newton iteration.
+ *
+ * @param {bigint} a bigint – radicand (≥ 0)
+ * @param {number} n – root degree (integer ≥ 1)
+ * @returns {bigint} – ⌊ a^(1/n) ⌋
+ * @throws {RangeError} If n is less than 1 or if a is negative and n is even.
+ */
+export const nthRoot = function(a: bigint, n: number): bigint {
+    if (n < 1) throw new RangeError("nthRoot(): n must be ≥ 1");
+    if (a < 0n) {
+        if (n % 2 === 0) throw new RangeError("nthRoot(): even root of negative");
+        // odd root of negative: treat via abs and negate at end
+        return -nthRoot(-a, n);
+    }
+    if (a < 2n) return a; // 0 or 1 short-circuit
+
+    // rough initial guess: 2^(⌈bitlen / n⌉)
+    const shift = Math.ceil(bitLength(a) / n);
+    let x = 1n << BigInt(shift);
+
+    const bigN = BigInt(n);
+    while (true) {
+        const t = (bigN - 1n) * x + a / pow(x, n - 1);
+        // integer division rounds down (floor)
+        const y = t / bigN;
+
+        // convergence: x is the floor root
+        if (y >= x) return x;
+        x = y;
+    }
+};
+
+/**
+ * Calculate square root of a number using the nthRoot function.
+ *
+ * @param {bigint} a - The number to calculate the square root for.
+ * @return {bigint} The square root of the number.
+ */
+export const sqrt = (a: bigint): bigint => nthRoot(a, 2);
+
+/**
+ * Calculate the manhattan distance between two points in a 2D space.
+ * It's the sum of the absolute differences of their Cartesian coordinates.
+ *
+ * @param {bigint} x1
+ * @param {bigint} y1
+ * @param {bigint} x2
+ * @param {bigint} y2
+ * @return {bigint} The manhattan distance between the two points.
+ * @see {@link https://en.wikipedia.org/wiki/Taxicab_geometry}
+ */
+export const manhattanDist = function(x1: bigint, y1: bigint, x2: bigint, y2: bigint): bigint {
+    return abs(x1 - x2) + abs(y1 - y2);
+};
+
+/**
+ * Calculate the Euclidean distance between two points in a 2D space.
+ * It's the length of the shortest path between two points in Euclidean space.
+ *
+ * @param {bigint} x1
+ * @param {bigint} y1
+ * @param {bigint} x2
+ * @param {bigint} y2
+ * @return {bigint} The Euclidean distance between the two points.
+ * @see {@link https://en.wikipedia.org/wiki/Euclidean_distance}
+ */
+export const euclideanDist = function(x1: bigint, y1: bigint, x2: bigint, y2: bigint): bigint {
+    return sqrt((x1 - x2) ** 2n + (y1 - y2) ** 2n);
+};
+
+/**
  * Calculate the greatest common divisor (GCD) of two numbers (negative allowed) using
  * the non-recursive Euclidean algorithm. The GCD is the largest positive integer that
  * divides both numbers without leaving a remainder. We intentionally avoid recursion to
  * prevent stack overflow for large numbers.
  *
- * @param a - The first number.
- * @param b - The second number.
- * @returns The GCD of the two numbers.
+ * @param {bigint} a - The first number.
+ * @param {bigint} b - The second number.
+ * @returns {bigint} The GCD of the two numbers.
  */
 export const gcd = function(a: bigint, b: bigint): bigint {
     // work with absolute values so gcd(−8, 12) === 4
@@ -62,9 +166,9 @@ export const gcd = function(a: bigint, b: bigint): bigint {
  *
  * The LCM of two coprime 64‑bit numbers is their product.
  *
- * @param a - The first number.
- * @param b - The second number.
- * @returns The LCM of the two numbers.
+ * @param {bigint} a - The first number.
+ * @param {bigint} b - The second number.
+ * @returns {bigint} The LCM of the two numbers.
  */
 export const lcm = (a: bigint, b: bigint): bigint => (a === 0n || b === 0n) ? 0n : (a / gcd(a, b)) * b;
 
@@ -96,8 +200,8 @@ export const lcmMulti = function(...nums: bigint[]): bigint {
  * Extended Euclidean algorithm to find the GCD of two numbers and
  * the coefficients x and y such that ax + by = gcd(a, b) -> The Bézout identity.
  *
- * @param a - The first number.
- * @param b - The second number.
+ * @param {bigint} a - The first number.
+ * @param {bigint} b - The second number.
  * @returns An array containing the GCD and the Bézout coefficients x and y.
  * @see {@link https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm}
  * @see {@link https://en.wikipedia.org/wiki/B%C3%A9zout%27s_identity}
@@ -136,10 +240,10 @@ export const mod = function(a: bigint, b: bigint): bigint {
  * Calculate the modular exponentiation of a base raised to an exponent modulo a number.
  * This is useful for large numbers and cryptography.
  *
- * @param base - The base number.
- * @param exp - The exponent.
- * @param m - The modulus.
- * @returns The result of (base ^ exp) % mod.
+ * @param {bigint} base - The base number.
+ * @param {bigint} exp - The exponent.
+ * @param {bigint} m - The modulus.
+ * @returns {bigint} The result of (base ^ exp) % mod.
  */
 export const modPow = function(base: bigint, exp: bigint, m: bigint): bigint {
     // avoid huge first square
@@ -157,9 +261,9 @@ export const modPow = function(base: bigint, exp: bigint, m: bigint): bigint {
  * Calculate the modular inverse of a number using the Extended Euclidean algorithm.
  * This is useful for cryptography and modular arithmetic.
  *
- * @param a - The number to find the modular inverse for.
- * @param m - The modulus.
- * @returns The modular inverse of a modulo m.
+ * @param {bigint} a - The number to find the modular inverse for.
+ * @param {bigint} m - The modulus.
+ * @returns {bigint} The modular inverse of a modulo m.
  * @throws {RangeError} If m is 0 or if a and m are not coprime.
  */
 export const modInv = function(a: bigint, m: bigint): bigint {
@@ -190,8 +294,8 @@ export const modDiv = function(a: bigint, b: bigint, m: bigint): bigint {
  * This is a test to determine is a number is prime or composite.
  * It is deterministic for all numbers up to 2^64.
  *
- * @param n - The number to test for primality.
- * @returns true if the number is prime, false if it is composite.
+ * @param {bigint} n - The number to test for primality.
+ * @returns {boolean} true if the number is prime, false if it is composite.
  * @see {@link https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test}
  */
 export const isPrime = function(n: bigint): boolean {
@@ -237,17 +341,16 @@ export const isPrime = function(n: bigint): boolean {
  * inclusive range [min, max]. Falls back to Math.random
  * when Web Crypto is missing (non-CSPRNG).
  *
- * @param min - The minimum value (inclusive).
- * @param max - The maximum value (inclusive).
- * @returns A random bigint in the range [min, max].
+ * @param {bigint} min - The minimum value (inclusive).
+ * @param {bigint} max - The maximum value (inclusive).
+ * @returns {bigint} A random bigint in the range [min, max].
  * @throws {RangeError} If max is less than min.
  */
 export const randomBigInt = function(min: bigint, max: bigint): bigint {
     const range = max - min + 1n;
     if (range <= 0n) throw new RangeError("max must be ≥ min");
 
-    const bitLength = range.toString(2).length;
-    const byteLength = Math.ceil(bitLength / 8);
+    const byteLength = Math.ceil(bitLength(range) / 8);
 
     const getRandomBytes = (len: number): Uint8Array => {
         if (typeof crypto !== "undefined" && crypto.getRandomValues) {
@@ -260,7 +363,7 @@ export const randomBigInt = function(min: bigint, max: bigint): bigint {
         return out;
     };
 
-    // Draw rnd ∈ [0 , 2^bits - 1] and accept when rnd < range
+    // Draw rnd ∈ [0, 2^bits - 1] and accept when rnd < range
     // Acceptance probability is around P(accept) = (range / 2^bits) >= 0.5
     // so, reaching 30 iterations is already below 1 in 2^29
     while (true) {
@@ -276,8 +379,8 @@ export const randomBigInt = function(min: bigint, max: bigint): bigint {
  * Pollard's ρ algorithm for integer factorization using
  * Brent's cycle detection / batching variant for speed.
  *
- * @param n - The number to factor.
- * @returns a non-trivial factor of n (or n itself if n is prime).
+ * @param {bigint} n - The number to factor.
+ * @returns {bigint} a non-trivial factor of n (or n itself if n is prime).
  * @see {@link https://en.wikipedia.org/wiki/Pollard%27s_rho_algorithm}
  */
 export const pollardRho = (n: bigint): bigint => {
