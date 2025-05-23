@@ -21,7 +21,7 @@ All functions are documented - and I tried to comment the code as well as the te
 ## ⛔ What this isn't
 
 This is not a fully fledge mathematical library like [mathjs](https://mathjs.org/). <br>
-It's a collection of functions I re-use occasionally. And it's **BigInt only!**.
+It's a collection of functions I re-use occasionally. And it's **BigInt only!**
 
 <hr>
 
