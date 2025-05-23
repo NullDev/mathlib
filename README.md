@@ -1,6 +1,6 @@
 # mathlib
 
-<p align="center" font-size="20px">🧮</p>
+<p align="center"><img height="150" width="auto" src="https://arithmetica.xyz/img/img.png" /></p>
 <p align="center"><b>Zero-dependency collection of advanced mathematical functions using BigInts.</b></p>
 
 <hr>
