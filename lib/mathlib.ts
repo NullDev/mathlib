@@ -69,7 +69,7 @@ export const gcd = function(a: bigint, b: bigint): bigint {
 export const lcm = (a: bigint, b: bigint): bigint => (a === 0n || b === 0n) ? 0n : (a / gcd(a, b)) * b;
 
 /**
- * Calculate the greatest common divisor (GCD) of multiple numbers using the GCD function.
+ * Calculate the greatest common divisor (GCD) of multiple numbers using a variadic GCD.
  *
  * @param {...bigint[]} nums - The numbers to calculate the GCD for.
  * @return {bigint} The GCD of the numbers.
@@ -81,7 +81,7 @@ export const gcdMulti = function(...nums: bigint[]): bigint {
 };
 
 /**
- * Calculate the least common multiple (LCM) of multiple numbers using the LCM function.
+ * Calculate the least common multiple (LCM) of multiple numbers using a variadic LCM function.
  *
  * @param {...bigint[]} nums - The numbers to calculate the LCM for.
  * @return {bigint} The LCM of the numbers.
