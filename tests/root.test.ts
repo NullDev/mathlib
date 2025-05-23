@@ -15,6 +15,10 @@ describe("mathlib - nthRoot", () => {
     test("even root of negative throws", () => {
         expect(() => nthRoot(-8n, 2)).toThrow(RangeError);
     });
+
+    test("odd root of a negative returns the negative root", () => {
+        expect(nthRoot(-27n, 3)).toBe(-3n);
+    });
 });
 
 // sqrt - shortcut for nthRoot(·, 2)

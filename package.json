@@ -5,7 +5,8 @@
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
-    "test": "bun test"
+    "test": "bun test",
+    "test:cov": "bun test --coverage"
   },
   "private": true,
   "devDependencies": {

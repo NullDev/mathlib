@@ -564,6 +564,7 @@ export const fibPair = function(n: bigint, m: bigint): [bigint, bigint] {
  * @param {bigint} p - The prime number to calculate the Pisano period for (prime modulus).
  * @return {bigint} The Pisano period π(p) - (or throws if p is not prime).
  * @throws {Error} If p is not prime.
+ * @throws {Error} If the exponent is too large.
  */
 export const primePisano = (p: bigint): bigint => {
     if (!isPrime(p)) throw new Error("primePisano: p must be prime");
@@ -584,11 +585,9 @@ export const primePisano = (p: bigint): bigint => {
     // Build the set of divisors by progressive multiplication
     const divisors: bigint[] = [1n];
     for (const [prime, expBig] of factors) {
-        const exp = expBig <= 9_007_199_254_740_991n // 2⁵³-1
-            ? Number(expBig)
-            : ((): never => {
-                throw new Error("Exponent too large");
-            })();
+        if (expBig > 9_007_199_254_740_991n) throw new Error("Exponent too large");
+
+        const exp = Number(expBig);
 
         const currentLen = divisors.length;
         let power = 1n;
