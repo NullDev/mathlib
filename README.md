@@ -59,3 +59,14 @@ It's a collection of functions I re-use occasionally. And it's **BigInt only!**
 - [ ] NPM package maybe
 
 <hr>
+
+## :octocat: Contributing
+
+Don't really expect anyone to contribute but...
+- Bun is needed to run the tests
+- TypeScript only
+- Adhere to style guide (eslint)
+- Every function should have a test
+- Every function should be documented
+
+<br>
