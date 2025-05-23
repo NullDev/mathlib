@@ -6,7 +6,9 @@
 
 ## What this is
 
-This is my personal zero-dependency collection of various mathematical functions using BigInts, completely written from scratch. <br>
+This is my personal zero-dependency collection of various mathematical functions using BigInts, <br>
+completely written from scratch. <br>
+
 Functions _should_ be optimized for performance and accuracy, and _should_ be safe for large numbers. <br>
 But I can give zero guarentees. If you're using this, you're on your own. <br>
 I do write tests for every single function implemented, but I cvan't guarentee that the tests are sane either... <br>
@@ -14,8 +16,8 @@ All functions are documented - and I tried to comment the code as well as the te
 
 ## What this isn't
 
-This is not a fully fledge mathematical library like [mathjs](https://mathjs.org/). 
-It's a collection of functions I re-use occasionally. And it's **BigInt only!**
+This is not a fully fledge mathematical library like [mathjs](https://mathjs.org/). <br>
+It's a collection of functions I re-use occasionally. And it's **BigInt only!**.
 
 ## What's implemented:
 
