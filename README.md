@@ -5,7 +5,7 @@
 
 <hr>
 
-## What this is
+## ✅ What this is
 
 This is my personal zero-dependency collection of various mathematical functions using BigInts, <br>
 completely written from scratch. <br>
@@ -17,14 +17,14 @@ All functions are documented - and I tried to comment the code as well as the te
 
 <hr>
 
-## What this isn't
+## ⛔ What this isn't
 
 This is not a fully fledge mathematical library like [mathjs](https://mathjs.org/). <br>
 It's a collection of functions I re-use occasionally. And it's **BigInt only!**.
 
 <hr>
 
-## What's implemented:
+## 📜 What's implemented:
 
 - abs - Absolute value of a BigInt
 - clamp - Clamp a BigInt to a given range
@@ -46,5 +46,14 @@ It's a collection of functions I re-use occasionally. And it's **BigInt only!**.
 - pisanoPeriod - Pisano period π(n) for any positive integer n ≥ 1
 
 ... more to come
+
+<hr>
+
+## 📋 To-Do
+
+- [ ] Test coverage overview / reporting
+- [ ] Build step & minification for browser
+- [ ] Better test setup (still figuring out bun:test)
+- [ ] Add more functions (only with tests)
 
 <hr>
