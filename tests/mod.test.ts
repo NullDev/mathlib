@@ -1,5 +1,5 @@
 import { expect, test, describe } from "bun:test";
-import { mod } from "../lib/mathlib";
+import { mod, modDiv, modInv, modPow } from "../lib/mathlib";
 
 // mod - true modulo for BigInt
 describe("mathlib - mod", () => {
@@ -15,5 +15,73 @@ describe("mathlib - mod", () => {
 
     test("throws when divisor is zero", () => {
         expect(() => mod(1n, 0n)).toThrow(RangeError);
+    });
+});
+
+// modDiv - modular division
+describe("mathlib - modDiv", () => {
+    test("(10 / 4) mod 13 = 9", () => {
+        expect(modDiv(10n, 4n, 13n)).toBe(9n);
+    });
+
+    test("handles negative divisor", () => {
+        expect(modDiv(10n, -4n, 13n)).toBe(4n);
+    });
+
+    test("throws when divisor has no inverse modulo m", () => {
+        // 6,9 not coprime
+        expect(() => modDiv(5n, 6n, 9n)).toThrow(RangeError);
+    });
+});
+
+// modInv - modular inverse
+describe("mathlib - modInv", () => {
+    test("finds inverse (3 mod 11 → 4)", () => {
+        // 3·4 ≡ 1 (mod 11)
+        expect(modInv(3n, 11n)).toBe(4n);
+    });
+
+    test("handles negative base (-3 mod 11 → 7)", () => {
+        const inv = modInv(-3n, 11n);
+
+        // -3·7 ≡ 1 (mod 11)
+        expect(modInv(-3n, 11n)).toBe(7n);
+
+        // verify that (-3 · inv) ≡ 1 (mod 11)
+        expect(((-3n * inv) % 11n + 11n) % 11n).toBe(1n);
+
+        // ensure the inverse is reported in the canonical range 0 … 10
+        expect(inv >= 0n && inv < 11n).toBe(true);
+    });
+
+    test("throws when numbers are not coprime", () => {
+        expect(() => modInv(6n, 9n)).toThrow(RangeError);
+    });
+});
+
+// modPow - Modular exponentiation
+describe("mathlib - modPow", () => {
+    test("modPow - small numbers", () => {
+        // 2^10 ≡ 24 (mod 1000)
+        expect(modPow(2n, 10n, 1000n)).toBe(24n);
+        // 27 ≡ 6 (mod 7)
+        expect(modPow(3n, 3n, 7n)).toBe(6n);
+        // x^0 ≡ 1 (mod m)
+        expect(modPow(10n, 0n, 13n)).toBe(1n);
+    });
+
+    test("modPow - medium numbers", () => {
+        expect(modPow(123456789n, 12345n, 1000000007n)).toBe(614455772n);
+        expect(modPow(987654321n, 123456n, 4294967291n)).toBe(3452667444n);
+    });
+
+    test("modPow - large numbers", () => {
+        expect(
+            modPow(
+                18446744073709551557n,
+                9223372036854775783n,
+                2305843009213693951n,
+            ),
+        ).toBe(622515688022284824n);
     });
 });
