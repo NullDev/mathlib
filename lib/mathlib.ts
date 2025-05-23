@@ -102,7 +102,7 @@ export const lcmMulti = function(...nums: bigint[]): bigint {
  * @see {@link https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm}
  * @see {@link https://en.wikipedia.org/wiki/B%C3%A9zout%27s_identity}
  */
-export const extendedGCD = function(a: bigint, b: bigint): [bigint, bigint, bigint] {
+export const gcdExt = function(a: bigint, b: bigint): [bigint, bigint, bigint] {
     let x0 = 1n;
     let x1 = 0n;
     let y0 = 0n;
@@ -165,7 +165,7 @@ export const modPow = function(base: bigint, exp: bigint, m: bigint): bigint {
 export const modInv = function(a: bigint, m: bigint): bigint {
     if (m === 0n) throw new RangeError("modInv() modulus must not be 0");
     a = mod(a, m); // a may be negative: 0 ≤ a < m
-    const [g, x] = extendedGCD(a, m);
+    const [g, x] = gcdExt(a, m);
     if (g !== 1n) throw new RangeError("modInv() a and m are not coprime");
     return mod(x, m); // ensure positive result
 };
