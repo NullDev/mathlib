@@ -133,7 +133,7 @@ export const manhattanDist = function(x1: bigint, y1: bigint, x2: bigint, y2: bi
  * @see {@link https://en.wikipedia.org/wiki/Euclidean_distance}
  */
 export const euclideanDist = function(x1: bigint, y1: bigint, x2: bigint, y2: bigint): bigint {
-    return sqrt((x1 - x2) ** 2n + (y1 - y2) ** 2n);
+    return sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2));
 };
 
 /**
@@ -305,7 +305,7 @@ export const isPrime = function(n: bigint): boolean {
     const SMALL = [2n, 3n, 5n, 7n, 11n, 13n, 17n, 19n, 23n, 29n, 31n, 37n] as const;
     for (const p of SMALL) {
         if (n === p) return true;
-        if (n % p === 0n) return false;
+        if (mod(n, p) === 0n) return false;
     }
 
     // write n-1 = 2^s · d with d odd
@@ -385,11 +385,11 @@ export const randomBigInt = function(min: bigint, max: bigint): bigint {
  */
 export const pollardRho = (n: bigint): bigint => {
     // Quick outs for even or prime n
-    if (n % 2n === 0n) return 2n;
+    if (mod(n, 2n) === 0n) return 2n;
     if (isPrime(n)) return n;
 
     // Polynomial f(x) = x² + c (mod n)
-    const f = (x: bigint, c: bigint): bigint => (x * x + c) % n;
+    const f = (x: bigint, c: bigint): bigint => mod(x * x + c, n);
 
     while (true) {
         // Fresh random parameters for each restart
@@ -496,17 +496,17 @@ export const fibPair = function(n: bigint, m: bigint): [bigint, bigint] {
     // scan bits from MSB → LSB
     for (bit -= 1n; bit >= 0n; bit--) {
         // 2·Fₖ (mod m)
-        const twoB = (b << 1n) % m;
+        const twoB = mod(b << 1n, m);
         // F₂k
-        const d = (a * ((twoB - a + m) % m)) % m;
+        const d = mod(a * mod(twoB - a + m, m), m);
         // F₂k+1
-        const e = (a * a + b * b) % m;
+        const e = mod(a * a + b * b, m);
 
         const isOdd = (n >> bit) & 1n;
         // next = (F₂k+1, F₂k + F₂k+1)
         if (isOdd) {
             a = e;
-            b = (d + e) % m;
+            b = mod(d + e, m);
         }
         // next = (F₂k  , F₂k+1)
         else {
@@ -532,8 +532,9 @@ export const primePisano = (p: bigint): bigint => {
     if (p === 5n) return 20n;
 
     // 1. Choose the bound that π(p) must divide
-    // Legendre symbol (5 | p) via Euler’s criterion
+    // Legendre symbol (5 | p) via Euler's criterion
     // https://en.wikipedia.org/wiki/Euler%27s_criterion
+    // https://en.wikipedia.org/wiki/Legendre_symbol
     const legendre5 = modPow(5n, (p - 1n) / 2n, p); // 1n or p-1n
     const bound = (legendre5 === 1n)
         ? (p - 1n)       // 5 is a square → p-1
@@ -595,7 +596,7 @@ export const pisanoPeriod = function(n: bigint): bigint {
 
     for (const [p, e] of primeFactors) {
         // π(pᵉ) = π(p)·p^{e-1}  for all primes except 2,5 (rule still works for >1)
-        const primePart = primePisano(p) * p ** (e - 1n);
+        const primePart = primePisano(p) * pow(p, Number(e - 1n));
         period = lcm(period, primePart);
     }
     return period;
