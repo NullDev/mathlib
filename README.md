@@ -1,4 +1,5 @@
 # mathlib
+[![License](https://img.shields.io/github/license/NullDev/mathlib?label=License&logo=Creative%20Commons)](https://github.com/NullDev/mathlib/blob/master/LICENSE)
 
 <p align="center"><img height="150" width="auto" src="https://arithmetica.xyz/img/img.png" /></p>
 <p align="center"><b>Zero-dependency collection of advanced mathematical functions using BigInts.</b></p>
