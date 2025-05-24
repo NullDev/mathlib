@@ -13,7 +13,7 @@ completely written from scratch. <br>
 
 Functions _should_ be optimized for performance and accuracy, and _should_ be safe for large numbers. <br>
 But I can give zero guarentees. If you're using this, you're on your own. <br>
-I do write tests for every single function implemented, but I cvan't guarentee that the tests are sane either... <br>
+I do write tests for every single function implemented, but I can't guarentee, that the tests are sane either... <br>
 All functions are documented - and I tried to comment the code as well as the tests as good as possible.
 
 <hr>
