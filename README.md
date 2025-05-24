@@ -58,6 +58,7 @@ It's a collection of functions I re-use occasionally. And it's **BigInt only!**
 - primePisano - Pisano period π(p) for a prime p
 - pisanoPeriod - Pisano period π(n) for any positive integer n ≥ 1
 - totient - Euler's totient function φ(n)
+- jacobi - Calculate the Jacobi symbol (a | n) for any positive integer n ≥ 1
 
 ... more to come
 

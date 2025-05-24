@@ -807,3 +807,67 @@ export const fib = (n: bigint): bigint => {
     // = Fₙ
     return a;
 };
+
+/**
+ * Calculate the Jacobi symbol (a | n) for any positive integer n ≥ 1.
+ * The Jacobi symbol is a generalization of the Legendre symbol for odd n.
+ *
+ * n must be an odd positive bigint (throws otherwise).
+ * Returns:
+ *    0n  if  gcd(a,n) ≠ 1
+ *   +1n  or  -1n  per quadratic-reciprocity rules
+ *
+ * Implements the classic binary/iterative algorithm:
+ *   1. Reduce a mod n
+ *   2. Strip out factors of 2 using (2 | n)
+ *   3. Swap (a,n) and apply quadratic reciprocity
+ *   4. Repeat until a == 0
+ *
+ * @param {bigint} a - The number to calculate the Jacobi symbol for.
+ * @param {bigint} n - The modulus.
+ * @return {bigint} The Jacobi symbol (a | n).
+ * @throws {RangeError} If n is not an odd positive integer.
+ * @see {@link https://en.wikipedia.org/wiki/Jacobi_symbol}
+ */
+export const jacobi = function(a: bigint, n: bigint): bigint {
+    if (n <= 0n || (n & 1n) === 0n) {
+        throw new RangeError("jacobi(): n must be an odd positive integer");
+    }
+
+    // 0 ≤ a < n
+    a = mod(a, n);
+    if (a === 0n) return 0n;
+    if (a === 1n) return 1n;
+
+    let result = 1n;
+
+    while (a !== 0n) {
+        // 1. Pull out powers of two
+        let tz = 0n;
+        while ((a & 1n) === 0n) {
+            // divide by 2
+            a >>= 1n;
+            tz++;
+        }
+
+        // apply (2 | n) rule
+        // only if an odd number of factors of 2
+        if (tz & 1n) {
+            // n mod 8
+            const nMod8 = n & 7n;
+            if (nMod8 === 3n || nMod8 === 5n) result = -result;
+        }
+
+        // 2. Quadratic reciprocity swap (sign flip)
+        // we need the *current* odd a and n for the (3,3) test
+        if ((a & 3n) === 3n && (n & 3n) === 3n) result = -result;
+
+        // 3. Euclid swap a ↔ n
+        [a, n] = [n % a, a]; // a gets smaller (Euclid step)
+
+        if (a === 0n) break;
+    }
+
+    // gcd(a,n)≠1 ⇒ symbol = 0
+    return n === 1n ? result : 0n;
+};
