@@ -68,9 +68,9 @@ export const pow = (base: bigint, exp: number): bigint => {
 /**
  * Floor of the n-th root of a ≥ 0 using Newton iteration.
  *
- * @param {bigint} a bigint – radicand (≥ 0)
- * @param {number} n – root degree (integer ≥ 1)
- * @returns {bigint} – ⌊ a^(1/n) ⌋
+ * @param {bigint} a bigint - radicand (≥ 0)
+ * @param {number} n - root degree (integer ≥ 1)
+ * @returns {bigint} - ⌊ a^(1/n) ⌋
  * @throws {RangeError} If n is less than 1 or if a is negative and n is even.
  */
 export const nthRoot = function(a: bigint, n: number): bigint {
@@ -355,12 +355,12 @@ export const eulerCriterion = function(a: bigint, p: bigint): bigint {
 };
 
 /**
- * Tonelli–Shanks square root mod an odd prime p.
+ * Tonelli-Shanks square root mod an odd prime p.
  * Calculate the modular square root of a number modulo a prime.
  * Returns the *least* root (x ≤ p-x) for reproducibility.
  *
  * p must be an odd prime (throws otherwise).
- * Runs in O(log² p) time (Tonelli–Shanks).
+ * Runs in O(log² p) time (Tonelli-Shanks).
  *
  * @example modSqrt(a, p) → x with x² ≡ a (mod p) or null if no root exists.
  *
@@ -414,7 +414,7 @@ export const modSqrt = function(a: bigint, p: bigint): bigint | null {
 };
 
 /**
- * Tonelli–Shanks nth root mod an odd prime p.
+ * Tonelli-Shanks nth root mod an odd prime p.
  * Finds x such that xᵏ ≡ a (mod p) when it exists and gcd(k, p-1)=1.
  * p must be an odd prime and k ≥ 1.
  * If gcd(k, p−1) > 1 the routine throws (general case requires discrete logs; out-of-scope for this helper for now).
@@ -870,4 +870,41 @@ export const jacobi = function(a: bigint, n: bigint): bigint {
 
     // gcd(a,n)≠1 ⇒ symbol = 0
     return n === 1n ? result : 0n;
+};
+
+/**
+ * Calculate the Möbius function μ(n) for any positive integer n ≥ 1.
+ * The Möbius function is a multiplicative function that returns:
+ *   μ(1) = 1
+ *   μ(n) = 0 if n is not square-free (has any squared prime factor)
+ *   μ(n) = (-1)^k when n is the product of k distinct primes (square-free)
+ *
+ * Runs in O(√n) expected time because it leans on the internal Pollard-ρ factoriser.
+ *
+ * @param {bigint} n - The number to calculate the Möbius function (for positive integer n ≥ 1).
+ * @return {bigint} The Möbius function μ(n) - (1n, 0n, or -1n).
+ * @throws {RangeError} If n is not a positive integer.
+ * @see {@link https://en.wikipedia.org/wiki/Mobius_function}
+ */
+export const mobius = (n: bigint): bigint => {
+    if (n < 1n) throw new RangeError("mobius(): n must be ≥ 1");
+
+    if (n === 1n) return 1n;
+
+    // Map<prime, exp>
+    const factors = factor(n);
+    let squareFree = true;
+    // distinct-prime count
+    let k = 0n;
+
+    for (const [, exp] of factors) {
+        if (exp > 1n) {
+            squareFree = false;
+            break;
+        }
+        k++;
+    }
+    if (!squareFree) return 0n;
+
+    return (k & 1n) === 0n ? 1n : -1n;
 };

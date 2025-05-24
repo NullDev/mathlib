@@ -44,8 +44,8 @@ It's a collection of functions I re-use occasionally. And it's **BigInt only!**
 - modPow - Modular exponentiation of a base raised to an exponent modulo a number
 - modInv - Modular inverse of a number using the Extended Euclidean algorithm
 - modDiv - Modular division of two numbers
-- modSqrt - Tonelli–Shanks square root mod an odd prime p
-- modNthRoot - Tonelli–Shanks nth root mod an odd prime p
+- modSqrt - Tonelli-Shanks square root mod an odd prime p
+- modNthRoot - Tonelli-Shanks nth root mod an odd prime p
 - isPrime - Miller-Rabin primality test on 64-bit-size BigInts with deterministic base set
 - eulerCriterion - Euler's criterion for quadratic residues modulo a prime p
 - randomBigInt - Cryptographically-strong (hopefully) random bigint in given range
@@ -59,6 +59,7 @@ It's a collection of functions I re-use occasionally. And it's **BigInt only!**
 - pisanoPeriod - Pisano period π(n) for any positive integer n ≥ 1
 - totient - Euler's totient function φ(n)
 - jacobi - Calculate the Jacobi symbol (a | n) for any positive integer n ≥ 1
+- mobius - Möbius function μ(n) for positive integer n ≥ 1
 
 ... more to come
 

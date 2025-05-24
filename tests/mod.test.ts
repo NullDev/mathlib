@@ -86,7 +86,7 @@ describe("mathlib - modPow", () => {
     });
 });
 
-// modSqrt - Tonelli–Shanks modular square root
+// modSqrt - Tonelli-Shanks modular square root
 describe("mathlib - modSqrt", () => {
     test("returns 0 when a ≡ 0 (mod p)", () => {
         expect(modSqrt(0n, 13n)).toBe(0n);
@@ -132,7 +132,7 @@ describe("mathlib - modSqrt", () => {
     });
 });
 
-// modNthRoot - Tonelli–Shanks nth root mod an odd prime p
+// modNthRoot - Tonelli-Shanks nth root mod an odd prime p
 describe("mathlib - modNthRoot", () => {
     test("k = 1 returns a mod p", () => {
         const p = 13n;
@@ -152,7 +152,7 @@ describe("mathlib - modNthRoot", () => {
     });
 
     test("throws when gcd(k, p-1) ≠ 1 (k = 5, p = 11)", () => {
-        // gcd(5, 10) = 5 – unsupported
+        // gcd(5, 10) = 5 - unsupported
         expect(() => modNthRoot(2n, 11n, 5n)).toThrow(RangeError);
     });
 });
