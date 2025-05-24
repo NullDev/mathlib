@@ -1,5 +1,5 @@
 import { expect, test, describe } from "bun:test";
-import { mod, modDiv, modInv, modPow } from "../lib/mathlib";
+import { mod, modDiv, modInv, modPow, modSqrt } from "../lib/mathlib";
 
 // mod - true modulo for BigInt
 describe("mathlib - mod", () => {
@@ -83,5 +83,51 @@ describe("mathlib - modPow", () => {
                 2305843009213693951n,
             ),
         ).toBe(622515688022284824n);
+    });
+});
+
+// modSqrt - Tonelli–Shanks modular square root
+describe("mathlib - modSqrt", () => {
+    test("returns 0 when a ≡ 0 (mod p)", () => {
+        expect(modSqrt(0n, 13n)).toBe(0n);
+    });
+
+    test("small prime 11: residue 9 → root 3 (least root)", () => {
+        const p = 11n;
+        // 3² ≡ 9 (mod 11)
+        const a = 9n;
+        const r = modSqrt(a, p);
+        // expect non-null
+        expect(r).not.toBeNull();
+        // for the linter...
+        if (!r) return;
+        // least root
+        expect(r).toBe(3n);
+        expect((r * r) % p).toBe(a);
+    });
+
+    test("small prime 11: non-residue 2 returns null", () => {
+        expect(modSqrt(2n, 11n)).toBeNull();
+    });
+
+    test("large 64-bit prime: a = 4 ⇒ root 2", () => {
+        // 2⁶⁴ − 59 (prime)
+        const p = 18_446_744_073_709_551_557n;
+        const r = modSqrt(4n, p);
+        // expect non-null
+        expect(r).not.toBeNull();
+        // for the linter...
+        if (!r) return;
+        // canonical least root
+        expect(r).toBe(2n);
+        // verify that r² ≡ 4 (mod p)
+        expect((r * r) % p).toBe(4n);
+    });
+
+    test("throws if modulus is not an odd prime", () => {
+        // composite
+        expect(() => modSqrt(4n, 15n)).toThrow(RangeError);
+        // even
+        expect(() => modSqrt(5n, 8n)).toThrow(RangeError);
     });
 });

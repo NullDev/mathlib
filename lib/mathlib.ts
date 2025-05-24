@@ -355,6 +355,65 @@ export const eulerCriterion = function(a: bigint, p: bigint): bigint {
 };
 
 /**
+ * Tonelli–Shanks square root mod an odd prime p.
+ * Calculate the modular square root of a number modulo a prime.
+ * Returns the *least* root (x ≤ p-x) for reproducibility.
+ *
+ * p must be an odd prime (throws otherwise).
+ * Runs in O(log² p) time (Tonelli–Shanks).
+ *
+ * @example modSqrt(a, p) → x with x² ≡ a (mod p) or null if no root exists.
+ *
+ * @param {bigint} a - The number to calculate the square root for.
+ * @param {bigint} p - The prime modulus.
+ * @returns {bigint | null} The modular square root of a modulo p, or null if a is not a quadratic residue.
+ * @throws {RangeError} If p is not an odd prime.
+ * @see {@link https://en.wikipedia.org/wiki/Tonelli%E2%80%93Shanks_algorithm}
+ */
+export const modSqrt = function(a: bigint, p: bigint): bigint | null {
+    if (p < 2n || !isPrime(p) || (p & 1n) === 0n) {
+        throw new RangeError("modSqrt: p must be an odd prime");
+    }
+
+    a = mod(a, p);
+    if (a === 0n) return 0n;
+    if (p === 2n) return a; // not reached (odd p), but harmless
+
+    // Use eulerCriterion helper instead of manual check
+    if (eulerCriterion(a, p) === -1n) return null; // non-residue
+
+    // factor p−1 = q · 2^s with q odd
+    let q = p - 1n;
+    let s = 0n;
+    while ((q & 1n) === 0n) { q >>= 1n; s++; }
+
+    // find quadratic non-residue z
+    let z = 2n;
+    while (modPow(z, (p - 1n) >> 1n, p) !== p - 1n) z++;
+
+    let c = modPow(z, q, p);
+    let x = modPow(a, (q + 1n) >> 1n, p);
+    let t = modPow(a, q, p);
+    let m = s;
+
+    while (t !== 1n) {
+        // smallest i with t^{2^i} ≡ 1
+        let i = 1n;
+        let t2i = modPow(t, 2n, p);
+        while (t2i !== 1n) { t2i = modPow(t2i, 2n, p); i++; }
+
+        const b = modPow(c, 1n << (m - i - 1n), p);
+        x = mod(x * b, p);
+        c = modPow(b, 2n, p);
+        t = mod(t * c, p);
+        m = i;
+    }
+
+    // canonical least root
+    return x <= p - x ? x : p - x;
+};
+
+/**
  * Return a cryptographically-strong random bigint in the
  * inclusive range [min, max]. Falls back to Math.random
  * when Web Crypto is missing (non-CSPRNG).
