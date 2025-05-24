@@ -52,6 +52,7 @@ It's a collection of functions I re-use occasionally. And it's **BigInt only!**
 - factor - Prime factorization using Pollard's rho
 - highestSetBit - Position of the highest set bit in a BigInt
 - fibPair - Calculate the nth Fibonacci number modulo m using iterative fast-doubling
+- fib - Calculate the nth Fibonacci number Fₙ for any integer n
 - primePisano - Pisano period π(p) for a prime p
 - pisanoPeriod - Pisano period π(n) for any positive integer n ≥ 1
 - totient - Euler's totient function φ(n)

@@ -547,7 +547,7 @@ export const fibPair = function(n: bigint, m: bigint): [bigint, bigint] {
             a = e;
             b = mod(d + e, m);
         }
-        // next = (F₂k  , F₂k+1)
+        // next = (F₂k, F₂k+1)
         else {
             a = d;
             b = e;
@@ -632,7 +632,7 @@ export const pisanoPeriod = function(n: bigint): bigint {
     let period = 1n;
 
     for (const [p, e] of primeFactors) {
-        // π(pᵉ) = π(p)·p^{e-1}  for all primes except 2,5 (rule still works for >1)
+        // π(pᵉ) = π(p)·p^{e-1} for all primes except 2,5 (rule still works for >1)
         const primePart = primePisano(p) * pow(p, Number(e - 1n));
         period = lcm(period, primePart);
     }
@@ -655,8 +655,59 @@ export const totient = function(n: bigint): bigint {
 
     let result = n;
     for (const [p] of factor(n)) {
-        // multiply by (p-1)/p  without leaving the integer domain
+        // multiply by (p-1)/p without leaving the integer domain
         result -= result / p; // equivalent to result *= (1 - 1/p)
     }
     return result;
+};
+
+/**
+ * Calculate the nth Fibonacci number Fₙ for any integer n using fast-doubling.
+ * Handles negative indices via parity rule.
+ *
+ * n ≥ 0  → Fₙ  (0, 1, 1, 2, 3, 5, …)
+ * n < 0  → F₋ₙ using  F₋ₙ = (-1)^{n+1}·Fₙ
+ *
+ * Fast-doubling iterative scan over the bits of |n|, no recursion.
+ * Runs in O(log |n|) time and O(1) memory.
+ *
+ * @param {bigint} n - The Fibonacci number to calculate.
+ * @return {bigint} The nth Fibonacci number.
+ * @see {@link https://en.wikipedia.org/wiki/Fibonacci_sequence}
+ * @see {@link https://oeis.org/A000045}
+ */
+export const fib = (n: bigint): bigint => {
+    // negative n via parity rule
+    if (n < 0n) {
+        // (-1)^{n+1}
+        const sign = (n & 1n) ? -1n : 1n;
+        return sign * fib(-n);
+    }
+    if (n === 0n) return 0n;
+    if (n === 1n) return 1n;
+
+    // Fast-doubling for n ≥ 2
+    let a = 0n; // F₀
+    let b = 1n; // F₁
+
+    let msb = highestSetBit(n) - 1n;
+
+    for (; msb >= 0n; msb--) {
+        const twoB = b << 1n;     // 2·Fₖ
+        const c = a * (twoB - a); // F₂k
+        const d = a * a + b * b;  // F₂k+1
+
+        // bit = 1 → (F₂k+1, F₂k+2)
+        if ((n >> msb) & 1n) {
+            a = d;
+            b = c + d;
+        }
+        // bit = 0 → (F₂k, F₂k+1)
+        else {
+            a = c;
+            b = d;
+        }
+    }
+    // = Fₙ
+    return a;
 };

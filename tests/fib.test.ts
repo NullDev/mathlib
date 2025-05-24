@@ -1,5 +1,5 @@
 import { expect, test, describe } from "bun:test";
-import { fibPair } from "../lib/mathlib";
+import { fibPair, fib } from "../lib/mathlib";
 
 // fibPair - fast-doubling Fibonacci (mod m)
 describe("mathlib - fibPair", () => {
@@ -25,5 +25,29 @@ describe("mathlib - fibPair", () => {
         const [f, fNext] = fibPair(123_456_789n, 1n);
         expect(f).toBe(0n);
         expect(fNext).toBe(0n);
+    });
+});
+
+// fib - Fibonacci number Fₙ for any integer n
+describe("mathlib - fib", () => {
+    test("negative n uses F₋ₙ = (-1)^{n+1}·Fₙ", () => {
+        // Even n → sign +1,  F₋₈ = 21
+        expect(fib(-8n)).toBe(21n);
+        // Odd  n → sign −1,  F₋₉ = −34
+        expect(fib(-9n)).toBe(-34n);
+    });
+
+    test("handles n = 0 and n = 1", () => {
+        expect(fib(0n)).toBe(0n);
+        expect(fib(1n)).toBe(1n);
+    });
+
+    test("small positive n: fib(2) = 1", () => {
+        expect(fib(2n)).toBe(1n);
+    });
+
+    test("moderately large n: fib(100)", () => {
+        // F₁₀₀ = 354224848179261915075
+        expect(fib(100n)).toBe(354_224_848_179_261_915_075n);
     });
 });
