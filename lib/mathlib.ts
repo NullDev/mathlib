@@ -414,6 +414,43 @@ export const modSqrt = function(a: bigint, p: bigint): bigint | null {
 };
 
 /**
+ * Tonelli–Shanks nth root mod an odd prime p.
+ * Finds x such that xᵏ ≡ a (mod p) when it exists and gcd(k, p-1)=1.
+ * p must be an odd prime and k ≥ 1.
+ * If gcd(k, p−1) > 1 the routine throws (general case requires discrete logs; out-of-scope for this helper for now).
+ * Falls back to modSqrt when k = 2.
+ * Returns null when no root exists.
+ *
+ * @param {bigint} a - The number to calculate the nth root for.
+ * @param {bigint} p - The prime modulus.
+ * @param {bigint} k - The nth root.
+ * @returns {bigint | null} The modular nth root of a modulo p, or null if a is not a kth power.
+ * @throws {RangeError} If p is not an odd prime or k is not ≥ 1.
+ * @see {@link https://en.wikipedia.org/wiki/Tonelli%E2%80%93Shanks_algorithm}
+ */
+export const modNthRoot = function(a: bigint, p: bigint, k: bigint): bigint | null {
+    if (k < 1n) throw new RangeError("modNthRoot: k must be ≥ 1");
+    if (p < 2n || !isPrime(p) || (p & 1n) === 0n) {throw new RangeError("modNthRoot: p must be an odd prime");}
+
+    a = mod(a, p);
+    if (a === 0n) return 0n;
+
+    // special-case square root (faster, handles residue test)
+    if (k === 2n) return modSqrt(a, p);
+
+    // group order
+    const phi = p - 1n;
+    if (gcd(k, phi) !== 1n) {throw new RangeError("modNthRoot: gcd(k, p-1) ≠ 1 not supported");}
+
+    // solvability: a^{φ} = 1, which always holds; further check not needed
+    const kInv = modInv(k, phi); // k · kInv ≡ 1 (mod φ)
+    const root = modPow(a, kInv, p);
+
+    // verification (cheap)
+    return modPow(root, k, p) === a ? root : null;
+};
+
+/**
  * Return a cryptographically-strong random bigint in the
  * inclusive range [min, max]. Falls back to Math.random
  * when Web Crypto is missing (non-CSPRNG).

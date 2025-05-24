@@ -1,5 +1,5 @@
 import { expect, test, describe } from "bun:test";
-import { mod, modDiv, modInv, modPow, modSqrt } from "../lib/mathlib";
+import { mod, modDiv, modInv, modPow, modSqrt, modNthRoot } from "../lib/mathlib";
 
 // mod - true modulo for BigInt
 describe("mathlib - mod", () => {
@@ -129,5 +129,30 @@ describe("mathlib - modSqrt", () => {
         expect(() => modSqrt(4n, 15n)).toThrow(RangeError);
         // even
         expect(() => modSqrt(5n, 8n)).toThrow(RangeError);
+    });
+});
+
+// modNthRoot - Tonelli–Shanks nth root mod an odd prime p
+describe("mathlib - modNthRoot", () => {
+    test("k = 1 returns a mod p", () => {
+        const p = 13n;
+        const a = 10n;
+        expect(modNthRoot(a, p, 1n)).toBe(a % p);
+    });
+
+    test("cube root exists: x³ ≡ 8 (mod 11) ⇒ x = 2", () => {
+        const p = 11n;
+        const k = 3n;
+        // 2³ ≡ 8 (mod 11)
+        const a = 8n;
+        const r = modNthRoot(a, p, k);
+        expect(r).not.toBeNull();
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        expect(modPow(r!, k, p)).toBe(a); // verifies root
+    });
+
+    test("throws when gcd(k, p-1) ≠ 1 (k = 5, p = 11)", () => {
+        // gcd(5, 10) = 5 – unsupported
+        expect(() => modNthRoot(2n, 11n, 5n)).toThrow(RangeError);
     });
 });
