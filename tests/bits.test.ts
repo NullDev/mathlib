@@ -1,5 +1,5 @@
 import { expect, test, describe } from "bun:test";
-import { bitLength, highestSetBit, randomBigInt } from "../lib/mathlib";
+import { bitLength, highestSetBit, randomBigInt, hammingWeight, prodOdd } from "../lib/mathlib";
 
 // bitLength - number of bits in a BigInt
 describe("mathlib - bitLength", () => {
@@ -96,5 +96,44 @@ describe("mathlib - randomBigInt", () => {
         // restore
         Math.random = savedRandom;
         globalThis.crypto = savedCrypto;
+    });
+});
+
+// hammingWeight / popCount - number of set bits
+describe("mathlib - hammingWeight", () => {
+    test("zero has popcount 0", () => {
+        expect(hammingWeight(0n)).toBe(0);
+    });
+
+    test("small values", () => {
+        expect(hammingWeight(1n)).toBe(1);    // 1 → 1
+        expect(hammingWeight(15n)).toBe(4);   // 1111₂ → 4
+    });
+
+    test("large 64-bit all-ones value ⇒ 64", () => {
+        const allOnes64 = (1n << 64n) - 1n;   // 0xFFFF_FFFF_FFFF_FFFFn
+        expect(hammingWeight(allOnes64)).toBe(64);
+    });
+});
+
+// prodOdd - product of all odd numbers in a given range
+describe("mathlib - prodOdd", () => {
+    test("range with no odd numbers returns 1", () => {
+        // only evens
+        expect(prodOdd(2n, 2n)).toBe(1n);
+    });
+
+    test("degenerate and minimal ranges", () => {
+        // single odd
+        expect(prodOdd(5n, 5n)).toBe(5n);
+        // exactly two odds: 3·5
+        expect(prodOdd(3n, 5n)).toBe(15n);
+    });
+
+    test("mixed even/odd endpoints and wider span", () => {
+        // odds inside 2…7  → 3·5·7 = 105
+        expect(prodOdd(2n, 7n)).toBe(105n);
+        // full first ten integers 1…9 → 1·3·5·7·9 = 945
+        expect(prodOdd(1n, 9n)).toBe(945n);
     });
 });

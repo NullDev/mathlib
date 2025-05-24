@@ -18,6 +18,14 @@
 export const abs = (n: bigint): bigint => n < 0n ? -n : n;
 
 /**
+ * Calculate the floor of the base-2 logarithm of a number.
+ *
+ * @param {number} n - The number to calculate the floor of the base-2 logarithm for.
+ * @return {number} The floor of the base-2 logarithm of the number.
+ */
+export const floorLog2 = (n: number): number => 31 - Math.clz32(n);
+
+/**
  * Clamp a number to a given range.
  *
  * @param {bigint} n - The number to clamp.
@@ -44,6 +52,50 @@ export const bitLength = function(v: bigint): number {
     let bits = 0;
     for (let x = v; x > 0n; x >>= 1n) bits++;
     return bits;
+};
+
+/**
+ * Calculate the population count (number of set bits) of a BigInt.
+ * Also known as Popcount or Bit Pop Count.
+ *
+ * @alias popCount
+ * @param {bigint} x - The number to calculate the population count for.
+ * @return {number} The population count of the number.
+ * @see {@link https://en.wikipedia.org/wiki/Hamming_weight}
+ */
+export const hammingWeight = function(x: bigint): number {
+    let c = 0;
+    while (x) {
+        c += Number(x & 1n);
+        x >>= 1n;
+    }
+    return c;
+};
+
+/**
+ * Calculate the product of all odd numbers in a given range.
+ *
+ * @param {bigint} lo - The lower bound of the range (inclusive).
+ * @param {bigint} hi - The upper bound of the range (inclusive).
+ * @return {bigint} The product of all odd numbers in the range.
+ */
+export const prodOdd = function(lo: bigint, hi: bigint): bigint {
+    // skip even endpoints
+    while ((lo & 1n) === 0n && lo <= hi) lo++;
+    while ((hi & 1n) === 0n && hi >= lo) hi--;
+
+    if (lo > hi) return 1n;
+    if (lo === hi) return lo;
+    // only two odds
+    if (hi - lo === 2n) return lo * (lo + 2n);
+
+    // make mid odd
+    const mid = ((lo + hi) >> 1n) | 1n;
+
+    // recursion should be fine, as the depth only grows log₂ n
+    // current implementation accepts largest n ≈ 2³²
+    //   -> depth ≤ log₂ 2³² = 32 stack frames
+    return prodOdd(lo, mid) * prodOdd(mid + 2n, hi);
 };
 
 /**
@@ -907,4 +959,71 @@ export const mobius = (n: bigint): bigint => {
     if (!squareFree) return 0n;
 
     return (k & 1n) === 0n ? 1n : -1n;
+};
+
+/**
+ * Calculate the exact factorial n! of a number for bigint n ≥ 0.
+ * Uses the binary-splitting + 2-factor extraction algorithm (Luschny style, "divide & conquer").
+ * Time: O(n log n) bit-ops · Space: O(log n) (recursion depth)
+ *
+ * @param {bigint} n - The number to calculate the factorial for.
+ * @return {bigint} The factorial of the number.
+ * @throws {RangeError} if n < 0 or n too large for 32-bit internal indexing
+ * @see {@link https://en.wikipedia.org/wiki/Factorial}
+ * @see {@link https://oeis.org/A000142}
+ * @see {@link https://www.luschny.de/math/factorial/FastFactorialFunctions.htm}
+ * @see {@link https://www.luschny.de/math/factorial}
+ */
+export const factorial = function(nBig: bigint): bigint {
+    if (nBig < 0n) throw new RangeError("factorial(): n must be non-negative");
+    if (nBig === 0n || nBig === 1n) return 1n;
+
+    // we need a JS number for the control variables (up to 2^53-1)
+    if (nBig > 9_007_199_254_740_991n) {
+        throw new RangeError("factorial(): n too large for current implementation");
+    }
+
+    const n = Number(nBig);
+
+    // state shared by the nested Product()
+    // starts at 1, then 3,5,…
+    let currentN = 1n;
+    const product = (len: number): bigint => {
+        // len / 2
+        const m = len >> 1;
+        // odd counter jumps by 2
+        if (m === 0) return (currentN += 2n);
+        if (len === 2) return (currentN += 2n) * (currentN += 2n);
+        // divide & conquer
+        return product(len - m) * product(m);
+    };
+
+    // main loop over log₂ n blocks
+    let h = 0;
+    let shift = 0;
+    let high = 1; // ints (JS number)
+    let p = 1n;   // partial product
+    let r = 1n;   // accumulated result
+
+    // starting exponent
+    let k = floorLog2(n);
+    while (h !== n) {
+        shift += h;
+        // next block size
+        h = n >> k--;
+        let len = high;
+        // make it odd
+        high = (h - 1) | 1;
+        // (# of new odd terms)/2
+        len = (high - len) >> 1;
+
+        if (len > 0) {
+            // multiply new swing
+            p *= product(len);
+            // accumulate
+            r *= p;
+        }
+    }
+    // attach 2-exponent
+    return r << BigInt(shift);
 };

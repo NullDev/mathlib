@@ -28,8 +28,11 @@ It's a collection of functions I re-use occasionally. And it's **BigInt only!**
 ## 📜 What's implemented:
 
 - abs - Absolute value of a BigInt
+- floorLog2 - Calculate the floor of the base-2 logarithm of a number
 - clamp - Clamp a BigInt to a given range
 - bitLength - Bit length of a BigInt
+- hammingWeight - Population count (number of set bits) of a BigInt
+- prodOdd - Calculate the product of all odd numbers in a given range
 - pow - Power of a BigInt (x^y)
 - nthRoot - nth root of a BigInt (x^(1/n))
 - sqrt - Square root of a BigInt
@@ -60,6 +63,7 @@ It's a collection of functions I re-use occasionally. And it's **BigInt only!**
 - totient - Euler's totient function φ(n)
 - jacobi - Calculate the Jacobi symbol (a | n) for any positive integer n ≥ 1
 - mobius - Möbius function μ(n) for positive integer n ≥ 1
+- factorial - Calculate the exact factorial n! of a number for bigint n ≥ 0
 
 ... more to come
 
