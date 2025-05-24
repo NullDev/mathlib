@@ -54,6 +54,7 @@ It's a collection of functions I re-use occasionally. And it's **BigInt only!**
 - fibPair - Calculate the nth Fibonacci number modulo m using iterative fast-doubling
 - primePisano - Pisano period π(p) for a prime p
 - pisanoPeriod - Pisano period π(n) for any positive integer n ≥ 1
+- totient - Euler's totient function φ(n)
 
 ... more to come
 

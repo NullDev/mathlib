@@ -638,3 +638,25 @@ export const pisanoPeriod = function(n: bigint): bigint {
     }
     return period;
 };
+
+/**
+ * Calculate the Euler's totient function φ(n) for any positive integer n ≥ 1.
+ * The totient function counts the number of positive integers up to a given
+ * integer n that are relatively prime to n (count of 1 ≤ k ≤ n with gcd(k,n)=1).
+ *
+ * @param {bigint} n - The number to calculate the Euler's totient function for.
+ * @return {bigint} The Euler's totient function φ(n).
+ * @throws {RangeError} If n is not positive.
+ * @see {@link https://en.wikipedia.org/wiki/Euler%27s_totient_function}
+ */
+export const totient = function(n: bigint): bigint {
+    if (n <= 0n) throw new RangeError("totient(): n must be positive");
+    if (n === 1n) return 1n;
+
+    let result = n;
+    for (const [p] of factor(n)) {
+        // multiply by (p-1)/p  without leaving the integer domain
+        result -= result / p; // equivalent to result *= (1 - 1/p)
+    }
+    return result;
+};
