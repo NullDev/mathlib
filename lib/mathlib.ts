@@ -7,7 +7,7 @@
  * Copyright (c) 2025, NullDev
  */
 
-/* eslint-disable no-param-reassign */
+/* eslint-disable no-param-reassign, @typescript-eslint/no-non-null-assertion */
 
 /**
  * Calculate the absolute value of a BigInt.
@@ -199,7 +199,7 @@ export const euclideanDist = function(x1: bigint, y1: bigint, x2: bigint, y2: bi
  * @returns {bigint} The GCD of the two numbers.
  */
 export const gcd = function(a: bigint, b: bigint): bigint {
-    // work with absolute values so gcd(−8, 12) === 4
+    // work with absolute values so gcd(-8, 12) === 4
     a = abs(a);
     b = abs(b);
 
@@ -434,7 +434,7 @@ export const modSqrt = function(a: bigint, p: bigint): bigint | null {
     // Use eulerCriterion helper instead of manual check
     if (eulerCriterion(a, p) === -1n) return null; // non-residue
 
-    // factor p−1 = q · 2^s with q odd
+    // factor p-1 = q · 2^s with q odd
     let q = p - 1n;
     let s = 0n;
     while ((q & 1n) === 0n) { q >>= 1n; s++; }
@@ -469,7 +469,7 @@ export const modSqrt = function(a: bigint, p: bigint): bigint | null {
  * Tonelli-Shanks nth root mod an odd prime p.
  * Finds x such that xᵏ ≡ a (mod p) when it exists and gcd(k, p-1)=1.
  * p must be an odd prime and k ≥ 1.
- * If gcd(k, p−1) > 1 the routine throws (general case requires discrete logs; out-of-scope for this helper for now).
+ * If gcd(k, p-1) > 1 the routine throws (general case requires discrete logs; out-of-scope for this helper for now).
  * Falls back to modSqrt when k = 2.
  * Returns null when no root exists.
  *
@@ -584,7 +584,7 @@ export const pollardRho = (n: bigint): bigint => {
             // Advance y by r steps (hare)
             for (let i = 0n; i < r; i++) y = quadraticPoly(y, c, n); // Polynomial f(x) = x² + c (mod n)
 
-            // Batch multiplications of |x − y| mod n
+            // Batch multiplications of |x - y| mod n
             let k = 0n;
             while (k < r && g === 1n) {
                 ys = y;
@@ -629,7 +629,6 @@ export const factor = function(n: bigint): Map<bigint, bigint> {
     const stack: bigint[] = [n];
 
     while (stack.length) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const current = stack.pop()!;
         if (current === 1n) continue;
 
@@ -1026,4 +1025,76 @@ export const factorial = function(nBig: bigint): bigint {
     }
     // attach 2-exponent
     return r << BigInt(shift);
+};
+
+/**
+ * Chinese Remainder Theorem (CRT) solver for a system of congruences.
+ *
+ * Given arrays of remainders r[i] and moduli m[i] ( m[i] > 0 ),
+ * finds the smallest non-negative integer x that satisfies
+ *
+ *   x ≡ r[i] (mod m[i]) for every i
+ *
+ * Handles *any* positive moduli - they don't need to be coprime.
+ * If the system is inconsistent (no solution) returns null.
+ * Otherwise returns a tuple [x, M] where:
+ *   M = lcm(m[0], …, m[k-1])
+ *   0 ≤ x < M, and every solution is congruent to x mod M
+ *
+ * Uses successive pair-wise merging with the extended-Euclidean algorithm:
+ *    M·t ≡ (b - a) (mod n) where a is current solution, M its modulus
+ *
+ * Time: O(k · log² max m[i]) Space: O(1)
+ *
+ * @param {bigint[]} remainders - The remainders of the congruences.
+ * @param {bigint[]} moduli - The moduli of the congruences.
+ * @return {bigint} The solution to the system of congruences.
+ * @throws {RangeError} If the arrays are not of equal, non-zero length or if the moduli are not positive.
+ * @see {@link https://en.wikipedia.org/wiki/Chinese_remainder_theorem}
+ */
+export const crt = function(remainders: bigint[], moduli: bigint[]): [bigint, bigint] | null {
+    const k = remainders.length;
+    if (k === 0 || k !== moduli.length){
+        throw new RangeError("crt(): arrays must be of equal, non-zero length");
+    }
+
+    // Step-0 normalisation: 0 ≤ r[i] < m[i] and m[i] > 0
+    const r: bigint[] = [];
+    const m: bigint[] = [];
+
+    for (let i = 0; i < k; i++) {
+        const modulus = moduli[i]!;
+        if (modulus <= 0n) {
+            throw new RangeError(`crt(): modulus at index ${i} must be > 0`);
+        }
+        m[i] = modulus;
+        r[i] = mod(remainders[i]!, modulus);
+    }
+
+    // initial pair - successive pair-wise merging
+    let x = r[0]!; // current solution
+    let M = m[0]!; // current modulus
+
+    for (let i = 1; i < k; i++) {
+        const b = r[i]!;
+        const n = m[i]!;
+
+        // solve M·t ≡ (b - x) (mod n)
+        // s*M + t*n = g
+        const [g, s] = gcdExt(M, n);
+        const diff = b - x;
+
+        // inconsistent system - no solution
+        if (diff % g !== 0n) return null;
+
+        // t = (b - x)/g · s modulo n/g
+        const t = mod((diff / g) * s, n / g);
+
+        // merged solution
+        x = mod(x + M * t, (M / g) * n);
+        // merged modulus
+        M = lcm(M, n);
+    }
+
+    return [x, M];
 };

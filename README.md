@@ -64,6 +64,7 @@ It's a collection of functions I re-use occasionally. And it's **BigInt only!**
 - jacobi - Calculate the Jacobi symbol (a | n) for any positive integer n ≥ 1
 - mobius - Möbius function μ(n) for positive integer n ≥ 1
 - factorial - Calculate the exact factorial n! of a number for bigint n ≥ 0
+- crt - Chinese Remainder Theorem solver for a system of congruences
 
 ... more to come
 
