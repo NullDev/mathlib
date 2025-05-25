@@ -8,16 +8,19 @@ describe("mathlib - bitLength", () => {
     });
 
     test("small numbers", () => {
-        expect(bitLength(1n)).toBe(1); // 1      → 1 bit
-        expect(bitLength(2n)).toBe(2); // 10     → 2 bits
-        expect(bitLength(3n)).toBe(2); // 11     → 2 bits
-        expect(bitLength(7n)).toBe(3); // 111    → 3 bits
+        expect(bitLength(1n)).toBe(1); // 1   → 1 bit
+        expect(bitLength(2n)).toBe(2); // 10  → 2 bits
+        expect(bitLength(3n)).toBe(2); // 11  → 2 bits
+        expect(bitLength(7n)).toBe(3); // 111 → 3 bits
     });
 
     test("large power-of-two boundary (2⁶³)", () => {
-        const n = 1n << 63n;           // 2^63
-        expect(bitLength(n)).toBe(64); // needs 64 bits (MSB position +1)
-        expect(bitLength(n - 1n)).toBe(63); // one less → 63 bits
+        // 2^63
+        const n = 1n << 63n;
+        // needs 64 bits (MSB position +1)
+        expect(bitLength(n)).toBe(64);
+        // one less → 63 bits
+        expect(bitLength(n - 1n)).toBe(63);
     });
 });
 
@@ -106,12 +109,15 @@ describe("mathlib - hammingWeight", () => {
     });
 
     test("small values", () => {
-        expect(hammingWeight(1n)).toBe(1);    // 1 → 1
-        expect(hammingWeight(15n)).toBe(4);   // 1111₂ → 4
+        // 1 → 1
+        expect(hammingWeight(1n)).toBe(1);
+        // 1111₂ → 4
+        expect(hammingWeight(15n)).toBe(4);
     });
 
     test("large 64-bit all-ones value ⇒ 64", () => {
-        const allOnes64 = (1n << 64n) - 1n;   // 0xFFFF_FFFF_FFFF_FFFFn
+        // 0xFFFF_FFFF_FFFF_FFFFn
+        const allOnes64 = (1n << 64n) - 1n;
         expect(hammingWeight(allOnes64)).toBe(64);
     });
 });

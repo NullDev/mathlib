@@ -8,7 +8,8 @@ describe("mathlib - manhattanDist", () => {
     });
 
     test("simple positive coordinates", () => {
-        expect(manhattanDist(1n, 2n, 4n, 6n)).toBe(7n); // |1-4| + |2-6|
+        // |1-4| + |2-6|
+        expect(manhattanDist(1n, 2n, 4n, 6n)).toBe(7n);
     });
 
     test("handles negatives correctly", () => {

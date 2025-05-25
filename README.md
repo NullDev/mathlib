@@ -77,6 +77,7 @@ It's a collection of functions I re-use occasionally. And it's **BigInt only!**
 - [ ] Better test setup (still figuring out bun:test)
 - [ ] Add more functions (only with tests)
 - [ ] NPM package maybe
+- [ ] Maybe split up mathlib into smaller related chunks
 
 <hr>
 

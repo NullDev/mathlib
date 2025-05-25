@@ -7,7 +7,7 @@
  * Copyright (c) 2025, NullDev
  */
 
-/* eslint-disable no-param-reassign, @typescript-eslint/no-non-null-assertion */
+/* eslint-disable no-param-reassign */
 
 /**
  * Calculate the absolute value of a BigInt.
@@ -169,9 +169,9 @@ export const sqrt = (a: bigint): bigint => nthRoot(a, 2);
  * @return {bigint} The manhattan distance between the two points.
  * @see {@link https://en.wikipedia.org/wiki/Taxicab_geometry}
  */
-export const manhattanDist = function(x1: bigint, y1: bigint, x2: bigint, y2: bigint): bigint {
-    return abs(x1 - x2) + abs(y1 - y2);
-};
+export const manhattanDist = (
+    x1: bigint, y1: bigint, x2: bigint, y2: bigint,
+): bigint => abs(x1 - x2) + abs(y1 - y2);
 
 /**
  * Calculate the Euclidean distance between two points in a 2D space.
@@ -184,9 +184,9 @@ export const manhattanDist = function(x1: bigint, y1: bigint, x2: bigint, y2: bi
  * @return {bigint} The Euclidean distance between the two points.
  * @see {@link https://en.wikipedia.org/wiki/Euclidean_distance}
  */
-export const euclideanDist = function(x1: bigint, y1: bigint, x2: bigint, y2: bigint): bigint {
-    return sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2));
-};
+export const euclideanDist = (
+    x1: bigint, y1: bigint, x2: bigint, y2: bigint,
+): bigint  => sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2));
 
 /**
  * Calculate the greatest common divisor (GCD) of two numbers (negative allowed) using
@@ -222,7 +222,9 @@ export const gcd = function(a: bigint, b: bigint): bigint {
  * @param {bigint} b - The second number.
  * @returns {bigint} The LCM of the two numbers.
  */
-export const lcm = (a: bigint, b: bigint): bigint => (a === 0n || b === 0n) ? 0n : (a / gcd(a, b)) * b;
+export const lcm = (
+    a: bigint, b: bigint,
+): bigint => (a === 0n || b === 0n) ? 0n : (a / gcd(a, b)) * b;
 
 /**
  * Calculate the greatest common divisor (GCD) of multiple numbers using a variadic GCD.
@@ -431,8 +433,8 @@ export const modSqrt = function(a: bigint, p: bigint): bigint | null {
     if (a === 0n) return 0n;
     if (p === 2n) return a; // not reached (odd p), but harmless
 
-    // Use eulerCriterion helper instead of manual check
-    if (eulerCriterion(a, p) === -1n) return null; // non-residue
+    // bound check (non-residue)
+    if (eulerCriterion(a, p) === -1n) return null;
 
     // factor p-1 = q · 2^s with q odd
     let q = p - 1n;
@@ -469,7 +471,7 @@ export const modSqrt = function(a: bigint, p: bigint): bigint | null {
  * Tonelli-Shanks nth root mod an odd prime p.
  * Finds x such that xᵏ ≡ a (mod p) when it exists and gcd(k, p-1)=1.
  * p must be an odd prime and k ≥ 1.
- * If gcd(k, p-1) > 1 the routine throws (general case requires discrete logs; out-of-scope for this helper for now).
+ * If gcd(k, p-1) > 1 the routine throws (general case requires discrete logs; out-of-scope).
  * Falls back to modSqrt when k = 2.
  * Returns null when no root exists.
  *
@@ -482,7 +484,9 @@ export const modSqrt = function(a: bigint, p: bigint): bigint | null {
  */
 export const modNthRoot = function(a: bigint, p: bigint, k: bigint): bigint | null {
     if (k < 1n) throw new RangeError("modNthRoot: k must be ≥ 1");
-    if (p < 2n || !isPrime(p) || (p & 1n) === 0n) {throw new RangeError("modNthRoot: p must be an odd prime");}
+    if (p < 2n || !isPrime(p) || (p & 1n) === 0n) {
+        throw new RangeError("modNthRoot: p must be an odd prime");
+    }
 
     a = mod(a, p);
     if (a === 0n) return 0n;
@@ -492,7 +496,9 @@ export const modNthRoot = function(a: bigint, p: bigint, k: bigint): bigint | nu
 
     // group order
     const phi = p - 1n;
-    if (gcd(k, phi) !== 1n) {throw new RangeError("modNthRoot: gcd(k, p-1) ≠ 1 not supported");}
+    if (gcd(k, phi) !== 1n) {
+        throw new RangeError("modNthRoot: gcd(k, p-1) ≠ 1 not supported");
+    }
 
     // solvability: a^{φ} = 1, which always holds; further check not needed
     const kInv = modInv(k, phi); // k · kInv ≡ 1 (mod φ)
@@ -757,7 +763,9 @@ export const primePisano = (p: bigint): bigint => {
         if (Fd === 0n && Fd1 === 1n) return d; // first hit is the period
     }
 
-    // Should never happen if factorisation is correct
+    // This line should never be reached if factorisation is correct.
+    // We literally can't have a test for this line, so once bun
+    // supports it, we need to exclude it from coverage.
     throw new Error("primePisano: period not found (factorisation error?)");
 };
 
@@ -865,8 +873,8 @@ export const fib = (n: bigint): bigint => {
  *
  * n must be an odd positive bigint (throws otherwise).
  * Returns:
- *    0n  if  gcd(a,n) ≠ 1
- *   +1n  or  -1n  per quadratic-reciprocity rules
+ *    0n if gcd(a,n) ≠ 1
+ *   +1n or -1n  per quadratic-reciprocity rules
  *
  * Implements the classic binary/iterative algorithm:
  *   1. Reduce a mod n
@@ -1042,7 +1050,7 @@ export const factorial = function(nBig: bigint): bigint {
  *   0 ≤ x < M, and every solution is congruent to x mod M
  *
  * Uses successive pair-wise merging with the extended-Euclidean algorithm:
- *    M·t ≡ (b - a) (mod n) where a is current solution, M its modulus
+ *   M·t ≡ (b - a) (mod n) where a is current solution, M its modulus
  *
  * Time: O(k · log² max m[i]) Space: O(1)
  *

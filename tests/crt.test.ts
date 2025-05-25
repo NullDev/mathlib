@@ -1,8 +1,6 @@
 import { expect, test, describe } from "bun:test";
 import { crt } from "../lib/mathlib";
 
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
 // crt - Chinese Remainder Theorem solver
 describe("mathlib - crt", () => {
     test("coprime moduli, unique solution", () => {

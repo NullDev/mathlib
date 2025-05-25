@@ -147,7 +147,6 @@ describe("mathlib - modNthRoot", () => {
         const a = 8n;
         const r = modNthRoot(a, p, k);
         expect(r).not.toBeNull();
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         expect(modPow(r!, k, p)).toBe(a); // verifies root
     });
 

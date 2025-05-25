@@ -188,6 +188,6 @@ export default [{                           // NullDev-Style ESLint Config: http
         "spaced-comment": 2,                // http://eslint.org/docs/rules/spaced-comment
         "@typescript-eslint/explicit-function-return-type": "warn",
         "@typescript-eslint/no-explicit-any": "warn",
-        "@typescript-eslint/no-non-null-assertion": "warn",
+        "@typescript-eslint/no-non-null-assertion": 0,
     },
 }];
