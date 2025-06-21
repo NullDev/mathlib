@@ -150,8 +150,30 @@ describe("mathlib - modNthRoot", () => {
         expect(modPow(r!, k, p)).toBe(a); // verifies root
     });
 
-    test("throws when gcd(k, p-1) ≠ 1 (k = 5, p = 11)", () => {
-        // gcd(5, 10) = 5 - unsupported
-        expect(() => modNthRoot(2n, 11n, 5n)).toThrow(RangeError);
+    test("gcd(k,p-1) = 5, root exists: x⁵ ≡ 10 (mod 11) ⇒ x = 2", () => {
+        const p = 11n;
+        const k = 5n; // gcd(5, 10) = 5
+        const a = 10n; // 2⁵ ≡ 10 (mod 11)
+        const r = modNthRoot(a, p, k);
+        expect(r).not.toBeNull();
+        expect(modPow(r!, k, p)).toBe(a); // verify
+    });
+
+    test("same parameters but unsolvable: x⁵ ≡ 2 (mod 11) ⇒ null", () => {
+        const p = 11n;
+        const k = 5n; // same subgroup size
+        const a = 2n; // 2 not a 5-th power mod 11
+        expect(modNthRoot(a, p, k)).toBeNull();
+    });
+
+    test("k < 1 triggers RangeError (k = 0 and k = -3)", () => {
+        expect(() => modNthRoot(5n, 11n, 0n)).toThrow(RangeError);
+        expect(() => modNthRoot(5n, 11n, -3n)).toThrow(RangeError);
+    });
+
+    test("p not odd prime triggers RangeError (p = 2, even composite, odd composite)", () => {
+        expect(() => modNthRoot(4n, 2n, 3n)).toThrow(RangeError); // p = 2 (even prime)
+        expect(() => modNthRoot(4n, 8n, 3n)).toThrow(RangeError); // even composite
+        expect(() => modNthRoot(4n, 15n, 3n)).toThrow(RangeError); // odd composite
     });
 });
