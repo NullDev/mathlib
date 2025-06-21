@@ -468,46 +468,6 @@ export const modSqrt = function(a: bigint, p: bigint): bigint | null {
 };
 
 /**
- * discreteLog(g, h, p, order) to find x s.t. g^x ≡ h (mod p)
- * Returns null if no solution.
- * Assumes 0 < g < p, p odd prime, and order | (p-1).
- * Uses Baby-Step / Giant-Step (BSGS)
- *
- * @param {bigint} g - The base of the logarithm.
- * @param {bigint} h - The value to take the logarithm of.
- * @param {bigint} p - The prime modulus.
- * @param {bigint} order - The order of the group (must divide p-1).
- * @return {bigint | null} The discrete logarithm x such that g^x ≡ h (mod p), or null if no solution exists.
- * @see {@link https://en.wikipedia.org/wiki/Baby-step_giant-step}
- * @see {@link https://en.wikipedia.org/wiki/Discrete_logarithm}
- */
-export const discreteLog = (g: bigint, h: bigint, p: bigint, order: bigint): bigint | null => {
-    const m = sqrt(order) + 1n; // baby-step size
-
-    // baby steps
-    const table = new Map<bigint, bigint>(); // value -> exponent
-    let e = 1n;
-    for (let j = 0n; j < m; j++) {
-        table.set(e, j);
-        e = (e * g) % p;
-    }
-
-    // giant steps
-    const gInvM = modInv(modPow(g, m, p), p); // g^(-m)
-    let gamma = h;
-
-    for (let i = 0n; i <= m; i++) {
-        const j = table.get(gamma);
-        if (j !== undefined) {
-            const x = i * m + j;
-            if (modPow(g, x, p) === h) return x % order;
-        }
-        gamma = (gamma * gInvM) % p;
-    }
-    return null;
-};
-
-/**
  * Return a cryptographically-strong random bigint in the
  * inclusive range [min, max]. Falls back to Math.random
  * when Web Crypto is missing (non-CSPRNG).
@@ -678,6 +638,46 @@ export function primitiveRoot(p: bigint): bigint {
     }
     throw new Error("primitiveRoot: no generator found (impossible for prime p)");
 }
+
+/**
+ * discreteLog(g, h, p, order) to find x s.t. g^x ≡ h (mod p)
+ * Returns null if no solution.
+ * Assumes 0 < g < p, p odd prime, and order | (p-1).
+ * Uses Baby-Step / Giant-Step (BSGS)
+ *
+ * @param {bigint} g - The base of the logarithm.
+ * @param {bigint} h - The value to take the logarithm of.
+ * @param {bigint} p - The prime modulus.
+ * @param {bigint} order - The order of the group (must divide p-1).
+ * @return {bigint | null} The discrete logarithm x such that g^x ≡ h (mod p), or null if no solution exists.
+ * @see {@link https://en.wikipedia.org/wiki/Baby-step_giant-step}
+ * @see {@link https://en.wikipedia.org/wiki/Discrete_logarithm}
+ */
+export const discreteLog = (g: bigint, h: bigint, p: bigint, order: bigint): bigint | null => {
+    const m = sqrt(order) + 1n; // baby-step size
+
+    // baby steps
+    const table = new Map<bigint, bigint>(); // value -> exponent
+    let e = 1n;
+    for (let j = 0n; j < m; j++) {
+        table.set(e, j);
+        e = (e * g) % p;
+    }
+
+    // giant steps
+    const gInvM = modInv(modPow(g, m, p), p); // g^(-m)
+    let gamma = h;
+
+    for (let i = 0n; i <= m; i++) {
+        const j = table.get(gamma);
+        if (j !== undefined) {
+            const x = i * m + j;
+            if (modPow(g, x, p) === h) return x % order;
+        }
+        gamma = (gamma * gInvM) % p;
+    }
+    return null;
+};
 
 /**
  * Tonelli-Shanks nth root mod an odd prime p.
