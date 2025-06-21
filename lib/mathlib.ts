@@ -654,7 +654,6 @@ export const factor = function(n: bigint): Map<bigint, bigint> {
  * Find any primitive root (generator) of the multiplicative group ℤp×.
  * p must be an odd prime.  Runs in O(√φ) time with trial-division.
  *
- * @export
  * @param {bigint} p - The prime modulus.
  * @return {bigint} A primitive root of p, or 1 if p = 2.
  * @throws {RangeError} If p is not an odd prime.
