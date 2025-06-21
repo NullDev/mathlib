@@ -648,13 +648,18 @@ export function primitiveRoot(p: bigint): bigint {
  * @param {bigint} g - The base of the logarithm.
  * @param {bigint} h - The value to take the logarithm of.
  * @param {bigint} p - The prime modulus.
- * @param {bigint} order - The order of the group (must divide p-1).
+ * @param {bigint} [order] - The order of the group (optional, defaults to p-1).
  * @return {bigint | null} The discrete logarithm x such that g^x ≡ h (mod p), or null if no solution exists.
+ * @throws {RangeError} If g^order mod p ≠ 1.
  * @see {@link https://en.wikipedia.org/wiki/Baby-step_giant-step}
  * @see {@link https://en.wikipedia.org/wiki/Discrete_logarithm}
  */
-export const discreteLog = (g: bigint, h: bigint, p: bigint, order: bigint): bigint | null => {
-    const m = sqrt(order) + 1n; // baby-step size
+export const discreteLog = (g: bigint, h: bigint, p: bigint, order?: bigint): bigint | null => {
+    const ord = order ?? (p - 1n); // default to full group
+
+    // quick sanity-check: g^{ord} must be 1 (mod p)
+    if (modPow(g, ord, p) !== 1n) throw new RangeError("discreteLog: order is not the order of g");
+    const m = sqrt(ord) + 1n; // baby-step size
 
     // baby steps
     const table = new Map<bigint, bigint>(); // value -> exponent
@@ -672,7 +677,7 @@ export const discreteLog = (g: bigint, h: bigint, p: bigint, order: bigint): big
         const j = table.get(gamma);
         if (j !== undefined) {
             const x = i * m + j;
-            if (modPow(g, x, p) === h) return x % order;
+            if (modPow(g, x, p) === h) return x % ord;
         }
         gamma = (gamma * gInvM) % p;
     }
@@ -728,13 +733,13 @@ export const modNthRoot = function(a: bigint, p: bigint, k: bigint): bigint | nu
 
     // get primitive root g_0 of ℤp×
     const g0 = primitiveRoot(p);
-    // A = log_{g_0}(a)
-    const A = discreteLog(g0, a, p, phi) ?? 0n; // 0 ≤ A < φ
-    if (A % g !== 0n) return null; // should never trigger after test
+    // dlog = log_{g_0}(a)
+    const dlog = discreteLog(g0, a, p, phi) ?? 0n; // 0 ≤ A < φ
+    if (dlog % g !== 0n) return null; // should never trigger after test
 
     const invK1 = modInv(k1, m);
     // solve as linear congruence
-    const X0 = ((A / g) * invK1) % m;
+    const X0 = ((dlog / g) * invK1) % m;
 
     let best: bigint | null = null;
     for (let t = 0n; t < g; t++) {
