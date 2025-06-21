@@ -48,7 +48,8 @@ It's a collection of functions I re-use occasionally. And it's **BigInt only!**
 - modInv - Modular inverse of a number using the Extended Euclidean algorithm
 - modDiv - Modular division of two numbers
 - modSqrt - Tonelli-Shanks square root mod an odd prime p
-- modNthRoot - Tonelli-Shanks nth root mod an odd prime p
+- modNthRoot - Tonelli-Shanks nth root mod an odd prime p for gcd(k, p-1)=1 and gcd(k, p-1) > 1
+- primitiveRoot - Find any primitive root (generator) of the multiplicative group ℤp×
 - isPrime - Miller-Rabin primality test on 64-bit-size BigInts with deterministic base set
 - eulerCriterion - Euler's criterion for quadratic residues modulo a prime p
 - randomBigInt - Cryptographically-strong (hopefully) random bigint in given range

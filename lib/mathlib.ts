@@ -468,44 +468,43 @@ export const modSqrt = function(a: bigint, p: bigint): bigint | null {
 };
 
 /**
- * Tonelli-Shanks nth root mod an odd prime p.
- * Finds x such that xᵏ ≡ a (mod p) when it exists and gcd(k, p-1)=1.
- * p must be an odd prime and k ≥ 1.
- * If gcd(k, p-1) > 1 the routine throws (general case requires discrete logs; out-of-scope).
- * Falls back to modSqrt when k = 2.
- * Returns null when no root exists.
+ * discreteLog(g, h, p, order) to find x s.t. g^x ≡ h (mod p)
+ * Returns null if no solution.
+ * Assumes 0 < g < p, p odd prime, and order | (p-1).
+ * Uses Baby-Step / Giant-Step (BSGS)
  *
- * @param {bigint} a - The number to calculate the nth root for.
+ * @param {bigint} g - The base of the logarithm.
+ * @param {bigint} h - The value to take the logarithm of.
  * @param {bigint} p - The prime modulus.
- * @param {bigint} k - The nth root.
- * @returns {bigint | null} The modular nth root of a modulo p, or null if a is not a kth power.
- * @throws {RangeError} If p is not an odd prime or k is not ≥ 1.
- * @see {@link https://en.wikipedia.org/wiki/Tonelli%E2%80%93Shanks_algorithm}
+ * @param {bigint} order - The order of the group (must divide p-1).
+ * @return {bigint | null} The discrete logarithm x such that g^x ≡ h (mod p), or null if no solution exists.
+ * @see {@link https://en.wikipedia.org/wiki/Baby-step_giant-step}
+ * @see {@link https://en.wikipedia.org/wiki/Discrete_logarithm}
  */
-export const modNthRoot = function(a: bigint, p: bigint, k: bigint): bigint | null {
-    if (k < 1n) throw new RangeError("modNthRoot: k must be ≥ 1");
-    if (p < 2n || !isPrime(p) || (p & 1n) === 0n) {
-        throw new RangeError("modNthRoot: p must be an odd prime");
+export const discreteLog = (g: bigint, h: bigint, p: bigint, order: bigint): bigint | null => {
+    const m = sqrt(order) + 1n; // baby-step size
+
+    // baby steps
+    const table = new Map<bigint, bigint>(); // value -> exponent
+    let e = 1n;
+    for (let j = 0n; j < m; j++) {
+        table.set(e, j);
+        e = (e * g) % p;
     }
 
-    a = mod(a, p);
-    if (a === 0n) return 0n;
+    // giant steps
+    const gInvM = modInv(modPow(g, m, p), p); // g^(-m)
+    let gamma = h;
 
-    // special-case square root (faster, handles residue test)
-    if (k === 2n) return modSqrt(a, p);
-
-    // group order
-    const phi = p - 1n;
-    if (gcd(k, phi) !== 1n) {
-        throw new RangeError("modNthRoot: gcd(k, p-1) ≠ 1 not supported");
+    for (let i = 0n; i <= m; i++) {
+        const j = table.get(gamma);
+        if (j !== undefined) {
+            const x = i * m + j;
+            if (modPow(g, x, p) === h) return x % order;
+        }
+        gamma = (gamma * gInvM) % p;
     }
-
-    // solvability: a^{φ} = 1, which always holds; further check not needed
-    const kInv = modInv(k, phi); // k · kInv ≡ 1 (mod φ)
-    const root = modPow(a, kInv, p);
-
-    // verification (cheap)
-    return modPow(root, k, p) === a ? root : null;
+    return null;
 };
 
 /**
@@ -649,6 +648,102 @@ export const factor = function(n: bigint): Map<bigint, bigint> {
         stack.push(divisor, current / divisor);
     }
     return factors;
+};
+
+/**
+ * Find any primitive root (generator) of the multiplicative group ℤp×.
+ * p must be an odd prime.  Runs in O(√φ) time with trial-division.
+ *
+ * @export
+ * @param {bigint} p - The prime modulus.
+ * @return {bigint} A primitive root of p, or 1 if p = 2.
+ * @throws {RangeError} If p is not an odd prime.
+ * @throws {Error} If no primitive root is found (impossible for prime p).
+ * @see {@link https://en.wikipedia.org/wiki/Primitive_root_modulo_n}
+ */
+export function primitiveRoot(p: bigint): bigint {
+    if (p === 2n) return 1n;
+    if (p < 2n || (p & 1n) === 0n || !isPrime(p)) {
+        throw new RangeError("primitiveRoot: p must be an odd prime");
+    }
+
+    const phi = p - 1n;
+    const factors = [...factor(phi).keys()]; // unique prime factors of φ (distinct primes dividing φ)
+
+    search: for (let g = 2n; g < p; g++) {
+        // g is primitive iff g^{φ/q} ≠ 1 (mod p) for every prime q | φ
+        for (const q of factors) {
+            if (modPow(g, phi / q, p) === 1n) continue search;
+        }
+        return g;
+    }
+    throw new Error("primitiveRoot: no generator found (impossible for prime p)");
+}
+
+/**
+ * Tonelli-Shanks nth root mod an odd prime p.
+ * Finds x such that xᵏ ≡ a (mod p) when it exists and gcd(k, p-1)=1.
+ * p must be an odd prime and k ≥ 1.
+ * If gcd(k, p-1) > 1 the routine reduces to a discrete logarithm problem.
+ * Falls back to modSqrt when k = 2.
+ * Returns null when no root exists.
+ *
+ * @param {bigint} a - The number to calculate the nth root for.
+ * @param {bigint} p - The prime modulus.
+ * @param {bigint} k - The nth root.
+ * @returns {bigint | null} The modular nth root of a modulo p, or null if a is not a kth power.
+ * @throws {RangeError} If p is not an odd prime or k is not ≥ 1.
+ * @see {@link https://en.wikipedia.org/wiki/Tonelli%E2%80%93Shanks_algorithm}
+ */
+export const modNthRoot = function(a: bigint, p: bigint, k: bigint): bigint | null {
+    if (k < 1n) throw new RangeError("modNthRoot: k must be ≥ 1");
+    if (p < 2n || !isPrime(p) || (p & 1n) === 0n) {
+        throw new RangeError("modNthRoot: p must be an odd prime");
+    }
+
+    a = mod(a, p);
+    if (a === 0n) return 0n;
+
+    // special-case square root (faster, handles residue test)
+    if (k === 2n) return modSqrt(a, p);
+
+    // group order
+    const phi = p - 1n;
+    const g   = gcd(k, phi);
+    const k1  = k / g;
+    const m   = phi / g;
+
+    // CASE 1: gcd = 1
+    if (g === 1n) {
+        // solvability: a^{φ} = 1, which always holds; further check not needed
+        const kInv = modInv(k, phi); // k · kInv ≡ 1 (mod φ)
+        const root = modPow(a, kInv, p);
+
+        // verification (cheap)
+        return modPow(root, k, p) === a ? root : null;
+    }
+
+    // CASE 2: gcd = g > 1
+    // solvability check: a^((p-1)/g) must be 1
+    if (modPow(a, phi / g, p) !== 1n) return null; // no solution
+
+    const g0 = primitiveRoot(p);
+    const A = discreteLog(g0, a, p, phi) ?? 0n; // 0 ≤ A < φ
+    if (A % g !== 0n) return null; // should never trigger after test
+
+    const invK1 = modInv(k1, m);
+    const X0    = ((A / g) * invK1) % m;
+
+    let best: bigint | null = null;
+    for (let t = 0n; t < g; t++) {
+        const X  = (X0 + t * m) % phi;
+        const cand = modPow(g0, X, p);
+        if (modPow(cand, k, p) === a &&
+        (best === null || cand < best)) {
+            best = cand;
+        }
+    }
+    return best;
 };
 
 /**
