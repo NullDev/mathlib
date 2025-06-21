@@ -726,11 +726,14 @@ export const modNthRoot = function(a: bigint, p: bigint, k: bigint): bigint | nu
     // solvability check: a^((p-1)/g) must be 1
     if (modPow(a, phi / g, p) !== 1n) return null; // no solution
 
+    // get primitive root g_0 of ℤp×
     const g0 = primitiveRoot(p);
+    // A = log_{g_0}(a)
     const A = discreteLog(g0, a, p, phi) ?? 0n; // 0 ≤ A < φ
     if (A % g !== 0n) return null; // should never trigger after test
 
     const invK1 = modInv(k1, m);
+    // solve as linear congruence
     const X0 = ((A / g) * invK1) % m;
 
     let best: bigint | null = null;
