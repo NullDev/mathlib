@@ -186,7 +186,7 @@ export const manhattanDist = (
  */
 export const euclideanDist = (
     x1: bigint, y1: bigint, x2: bigint, y2: bigint,
-): bigint  => sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2));
+): bigint => sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2));
 
 /**
  * Calculate the greatest common divisor (GCD) of two numbers (negative allowed) using
@@ -534,8 +534,8 @@ export const pollardRho = (n: bigint): bigint => {
     while (true) {
         // Fresh random parameters for each restart
         const y0 = randomBigInt(2n, n - 2n); // initial value
-        const c  = randomBigInt(1n, n - 1n); // polynomial constant
-        const m  = 128n;                     // batch size for Brent
+        const c = randomBigInt(1n, n - 1n);  // polynomial constant
+        const m = 128n;                      // batch size for Brent
         let y = y0;                          // "powering" value
         let r = 1n;                          // cycle length estimate
         let q = 1n;                          // product of |x-y| mod n
@@ -708,9 +708,9 @@ export const modNthRoot = function(a: bigint, p: bigint, k: bigint): bigint | nu
 
     // group order
     const phi = p - 1n;
-    const g   = gcd(k, phi);
-    const k1  = k / g;
-    const m   = phi / g;
+    const g = gcd(k, phi);
+    const k1 = k / g;
+    const m = phi / g;
 
     // CASE 1: gcd = 1
     if (g === 1n) {
@@ -731,11 +731,11 @@ export const modNthRoot = function(a: bigint, p: bigint, k: bigint): bigint | nu
     if (A % g !== 0n) return null; // should never trigger after test
 
     const invK1 = modInv(k1, m);
-    const X0    = ((A / g) * invK1) % m;
+    const X0 = ((A / g) * invK1) % m;
 
     let best: bigint | null = null;
     for (let t = 0n; t < g; t++) {
-        const X  = (X0 + t * m) % phi;
+        const X = (X0 + t * m) % phi;
         const cand = modPow(g0, X, p);
         if (modPow(cand, k, p) === a &&
         (best === null || cand < best)) {
@@ -914,8 +914,8 @@ export const totient = function(n: bigint): bigint {
  * Calculate the nth Fibonacci number Fₙ for any integer n using fast-doubling.
  * Handles negative indices via parity rule.
  *
- * n ≥ 0  → Fₙ  (0, 1, 1, 2, 3, 5, …)
- * n < 0  → F₋ₙ using  F₋ₙ = (-1)^{n+1}·Fₙ
+ * n ≥ 0 → Fₙ (0, 1, 1, 2, 3, 5, …)
+ * n < 0 → F₋ₙ using F₋ₙ = (-1)^{n+1}·Fₙ
  *
  * Fast-doubling iterative scan over the bits of |n|, no recursion.
  * Runs in O(log |n|) time and O(1) memory.
