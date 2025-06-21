@@ -584,7 +584,7 @@ export const pollardRho = (n: bigint): bigint => {
 
 /**
  * Prime factorization using Pollard's rho algorithm.
- * Iterative: no recursion → safe for very composite inputs.
+ * Iterative: no recursion -> safe for very composite inputs.
  *
  * @param {bigint} n - The number to factor.
  * @return {Map<bigint, bigint>} A map of prime factors and their powers.
@@ -612,7 +612,7 @@ export const factor = function(n: bigint): Map<bigint, bigint> {
 
 /**
  * Find any primitive root (generator) of the multiplicative group ℤp×.
- * p must be an odd prime.  Runs in O(√φ) time with trial-division.
+ * p must be an odd prime. Runs in O(√φ) time with trial-division.
  *
  * @param {bigint} p - The prime modulus.
  * @return {bigint} A primitive root of p, or 1 if p = 2.
