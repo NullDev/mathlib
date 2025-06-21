@@ -648,13 +648,18 @@ export function primitiveRoot(p: bigint): bigint {
  * @param {bigint} g - The base of the logarithm.
  * @param {bigint} h - The value to take the logarithm of.
  * @param {bigint} p - The prime modulus.
- * @param {bigint} order - The order of the group (must divide p-1).
+ * @param {bigint} [order] - The order of the group (optional, defaults to p-1).
  * @return {bigint | null} The discrete logarithm x such that g^x ≡ h (mod p), or null if no solution exists.
+ * @throws {RangeError} If g^order mod p ≠ 1.
  * @see {@link https://en.wikipedia.org/wiki/Baby-step_giant-step}
  * @see {@link https://en.wikipedia.org/wiki/Discrete_logarithm}
  */
-export const discreteLog = (g: bigint, h: bigint, p: bigint, order: bigint): bigint | null => {
-    const m = sqrt(order) + 1n; // baby-step size
+export const discreteLog = (g: bigint, h: bigint, p: bigint, order?: bigint): bigint | null => {
+    const ord = order ?? (p - 1n); // default to full group
+
+    // quick sanity-check: g^{ord} must be 1 (mod p)
+    if (modPow(g, ord, p) !== 1n) throw new RangeError("discreteLog: order is not the order of g");
+    const m = sqrt(ord) + 1n; // baby-step size
 
     // baby steps
     const table = new Map<bigint, bigint>(); // value -> exponent
@@ -672,7 +677,7 @@ export const discreteLog = (g: bigint, h: bigint, p: bigint, order: bigint): big
         const j = table.get(gamma);
         if (j !== undefined) {
             const x = i * m + j;
-            if (modPow(g, x, p) === h) return x % order;
+            if (modPow(g, x, p) === h) return x % ord;
         }
         gamma = (gamma * gInvM) % p;
     }
